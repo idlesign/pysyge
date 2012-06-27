@@ -1,0 +1,38 @@
+pysyge
+======
+http://github.com/idlesign/pysyge
+
+
+What's that
+-----------
+
+*pysyge is an API to access data from Sypex Geo IP database files from your Python code.*
+
+For more information about Sypex Geo databases please visit http://sypexgeo.net
+
+
+Quickstart
+----------
+
+Download Geo IP database file from http://sypexgeo.net/ (example below uses `SxGeoCity.dat` file).
+
+Application sample::
+
+    # Import all we need from pysyge module.
+    from pysyge import Pysyge, SXGEO_BATCH, SXGEO_MEMORY
+
+    # Create Pysyge object to access API.
+    # First argument is a path to Sypex Geo database file.
+    #
+    # Second argument is used to adjust pysyge mode. Choices:
+    #   SXGEO_FILE - Read data from file at every request.
+    #   SXGEO_BATCH - Turn on optimization for batch requests.
+    #   SXGEO_MEMORY - Read data from memory.
+    geodata = Pysyge('SxGeoCity.dat', SXGEO_BATCH | SXGEO_MEMORY)
+
+    # Request geo information for 77.88.21.3 IP address.
+    location = geodata.get_location('77.88.21.3', detailed=True)
+
+    # Print out some lyrics.
+    print('%s ($s) calling. All the circuits are busy.' % (location['city'], location['country']))
+
