@@ -86,7 +86,17 @@ class GeoLocator:
     _batch_mode = False
     _memory_mode = False
 
-    def __init__(self, db_file='SxGeo.dat', type=MODE_FILE):
+    def __init__(self, db_file, mode=MODE_FILE):
+        """Creates an interface to access Sypex Geo IP database data.
+
+        :param db_file: A path to Sypex Geo IP database file.
+        :param mode: Can be any of the following, or a combination:
+            MODE_FILE - Seek data in database file on every IP request. Default.
+            MODE_MEMORY - Read entire db into memory, an seek data there.
+            MODE_BATCH - Create additional indexes to speed up batch IP requests.
+        :raises: IOError, GeoLocatorException
+
+        """
         self._fh = open(db_file, 'rb')
 
         header = self._fh.read(32)
@@ -114,8 +124,8 @@ class GeoLocator:
         self._block_len = self._id_len + 3
         self._max_region = prolog['max_region']
         self._max_city = prolog['max_city']
-        self._batch_mode = type & MODE_BATCH
-        self._memory_mode = type & MODE_MEMORY
+        self._batch_mode = mode & MODE_BATCH
+        self._memory_mode = mode & MODE_MEMORY
         self._db_ver = prolog['ver']
         self._db_ts = prolog['ts']
 
@@ -270,6 +280,11 @@ class GeoLocator:
         return datetime.fromtimestamp(self._db_ts)
 
     def get_location(self, ip, detailed=False):
+        """Returns a dictionary with location data or False on failure.
+        Amount of information about IP contained in the dictionary depends
+        upon `detailed` flag state.
+
+        """
         seek = self._get_pos(ip)
         if seek > 0:
             location = self._parse_location(seek)
