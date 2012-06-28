@@ -3,16 +3,16 @@ from socket import inet_aton
 from math import floor
 
 
-SXGEO_FILE = 0
-SXGEO_MEMORY = 1
-SXGEO_BATCH = 2
+MODE_FILE = 0
+MODE_MEMORY = 1
+MODE_BATCH = 2
 
 
-class PysygeException(Exception):
+class GeoLocatorException(Exception):
     pass
 
 
-class Pysyge:
+class GeoLocator:
     _cc2iso = (
         '', 'AP', 'EU', 'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AN', 'AO', 'AQ',
         'AR', 'AS', 'AT', 'AU', 'AW', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BH',
@@ -85,12 +85,12 @@ class Pysyge:
     _batch_mode = False
     _memory_mode = False
 
-    def __init__(self, db_file='SxGeo.dat', type=SXGEO_FILE):
+    def __init__(self, db_file='SxGeo.dat', type=MODE_FILE):
         self._fh = open(db_file, 'rb')
 
         header = self._fh.read(32)
         if header[:3] != 'SxG':
-            raise PysygeException('Unable open file %s' % db_file)
+            raise GeoLocatorException('Unable open file %s' % db_file)
 
         prolog = dict(zip(
             ('ver', 'time', 'type', 'charset', 'b_idx_len',
@@ -100,7 +100,7 @@ class Pysyge:
 
         if prolog['b_idx_len'] * prolog['m_idx_len'] * prolog['range'] * prolog['db_items'] *\
            prolog['time'] * prolog['id_len'] == 0:
-            raise PysygeException('Wrong file format %s' % db_file)
+            raise GeoLocatorException('Wrong file format %s' % db_file)
 
         self._b_idx_str = self._fh.read(prolog['b_idx_len'] * 4)
         self._b_idx_len = prolog['b_idx_len']
@@ -113,8 +113,8 @@ class Pysyge:
         self._block_len = self._id_len + 3
         self._max_region = prolog['max_region']
         self._max_city = prolog['max_city']
-        self._batch_mode = type & SXGEO_BATCH
-        self._memory_mode = type & SXGEO_MEMORY
+        self._batch_mode = type & MODE_BATCH
+        self._memory_mode = type & MODE_MEMORY
 
         if self._batch_mode:
             self._b_idx_set = unpack('>%dL' % self._b_idx_len, self._b_idx_str)
@@ -259,12 +259,6 @@ class Pysyge:
         city['city'] = raw[15:].split('\0', 2)[0]
 
         return city
-
-    def get(self, ip):
-        if self._max_city:
-            return self.get_location(ip)
-        else:
-            return self.get_location(ip)
 
     def get_country_iso(self, ip):
         return self._cc2iso[self.get_location_id(ip)]
