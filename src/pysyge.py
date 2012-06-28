@@ -1,6 +1,7 @@
 from struct import unpack
 from socket import inet_aton
 from math import floor
+from datetime import datetime
 
 
 MODE_FILE = 0
@@ -93,13 +94,13 @@ class GeoLocator:
             raise GeoLocatorException('Unable open file %s' % db_file)
 
         prolog = dict(zip(
-            ('ver', 'time', 'type', 'charset', 'b_idx_len',
+            ('ver', 'ts', 'type', 'charset', 'b_idx_len',
              'm_idx_len', 'range', 'db_items', 'id_len', 'max_region',
              'max_city', 'region_size', 'city_size'),
             unpack('>BLBBBHHLBHHLL', header[3:])))
 
         if prolog['b_idx_len'] * prolog['m_idx_len'] * prolog['range'] * prolog['db_items'] *\
-           prolog['time'] * prolog['id_len'] == 0:
+           prolog['ts'] * prolog['id_len'] == 0:
             raise GeoLocatorException('Wrong file format %s' % db_file)
 
         self._b_idx_str = self._fh.read(prolog['b_idx_len'] * 4)
@@ -115,6 +116,8 @@ class GeoLocator:
         self._max_city = prolog['max_city']
         self._batch_mode = type & MODE_BATCH
         self._memory_mode = type & MODE_MEMORY
+        self._db_ver = prolog['ver']
+        self._db_ts = prolog['ts']
 
         if self._batch_mode:
             self._b_idx_set = unpack('>%dL' % self._b_idx_len, self._b_idx_str)
@@ -259,6 +262,12 @@ class GeoLocator:
         city['city'] = raw[15:].split('\0', 2)[0]
 
         return city
+
+    def get_db_version(self):
+        return self._db_ver
+
+    def get_db_date(self):
+        return datetime.fromtimestamp(self._db_ts)
 
     def get_country_iso(self, ip):
         return self._cc2iso[self.get_location_id(ip)]
