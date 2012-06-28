@@ -28,5 +28,5 @@ Application sample::
     location = geodata.get_location('77.88.21.3', detailed=True)
 
     # Print out some lyrics.
-    print('%s (%s) calling. All the circuits are busy.' % (location['city'], location['country']))
+    print('%s (%s) calling. All the circuits are busy.' % (location['city'], location['country_iso']))
 
