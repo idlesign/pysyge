@@ -233,7 +233,7 @@ class GeoLocator:
             return self._search_db(self._fh.read(len * self._block_len), ipn, 0, len - 1)
 
     def _parse_location_details(self, city):
-        region_seek = city['regid']
+        region_seek = city['region_id']
 
         if region_seek > 0:
             if self._memory_mode:
@@ -241,11 +241,11 @@ class GeoLocator:
             else:
                 self._fh.seek(self._info['regions_begin'] + region_seek)
                 region = self._fh.read(self._max_region).split('\0')
-            city['region_name'] = region[0]
-            city['timezone'] = self._tz[int(region[1])]
+            city['region'] = region[0]
+            city['tz'] = self._tz[int(region[1])]
         else:
-            city['region_name'] = ''
-            city['timezone'] = ''
+            city['region'] = ''
+            city['tz'] = ''
         return city
 
     def _parse_location(self, seek):
@@ -255,8 +255,8 @@ class GeoLocator:
             self._fh.seek(self._info['cities_begin'] + seek)
             raw = self._fh.read(self._max_city)
 
-        city = dict(zip(('regid', 'cc', 'fips', 'lat', 'lon'), unpack('>LB2sLL', raw[:15])))
-        city['country'] = self._cc2iso[city['cc']]
+        city = dict(zip(('region_id', 'country_id', 'fips', 'lat', 'lon'), unpack('>LB2sLL', raw[:15])))
+        city['country_iso'] = self._cc2iso[city['country_id']]
         city['lat'] /= float(1000000)
         city['lon'] /= float(1000000)
         city['city'] = raw[15:].split('\0', 2)[0]
@@ -268,12 +268,6 @@ class GeoLocator:
 
     def get_db_date(self):
         return datetime.fromtimestamp(self._db_ts)
-
-    def get_country_iso(self, ip):
-        return self._cc2iso[self.get_location_id(ip)]
-
-    def get_location_id(self, ip):
-        return self._get_pos(ip)
 
     def get_location(self, ip, detailed=False):
         seek = self._get_pos(ip)
