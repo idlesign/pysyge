@@ -251,8 +251,16 @@ class GeoLocator:
             else:
                 self._fh.seek(self._info['regions_begin'] + region_seek)
                 region = self._fh.read(self._max_region).split('\0')
-            city['region'] = region[0]
-            city['tz'] = self._tz[int(region[1])]
+                
+            if region[0]:
+                city['region'] = region[0]
+            else:
+                city['region'] = ''
+                
+            if region[1]:
+                city['tz'] = self._tz[int(region[1])]
+            else:
+                city['tz'] = ''
         else:
             city['region'] = ''
             city['tz'] = ''
