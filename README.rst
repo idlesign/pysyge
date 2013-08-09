@@ -2,6 +2,8 @@ pysyge
 ======
 http://github.com/idlesign/pysyge
 
+.. image:: https://pypip.in/d/pysyge/badge.png
+        :target: https://crate.io/packages/pysyge
 
 What's that
 -----------
