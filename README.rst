@@ -32,3 +32,7 @@ Application sample::
     # Print out some lyrics.
     print('%s (%s) calling. All the circuits are busy.' % (location['city'], location['country_iso']))
 
+
+
+.. image:: https://d2weczhvl823v0.cloudfront.net/idlesign/pysyge/trend.png
+        :target: https://bitdeli.com/free
