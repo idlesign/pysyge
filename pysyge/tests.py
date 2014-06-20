@@ -4,7 +4,9 @@ import unittest
 import datetime
 
 
-DATABASE_CITY_FILE = 'SxGeoCity.dat'  # от 2013.04.22
+# DATABASE_CITY_FILE = 'SxGeo.dat'  # от 2014.06.04
+# DATABASE_CITY_FILE = 'SxGeoCity.dat'  # от 2014.06.04
+DATABASE_CITY_FILE = 'SxGeoCityMax.dat'  # от 2014.06.04
 BASE_IP = '77.88.21.3'
 
 
@@ -49,10 +51,10 @@ class GeoLocatorFileModeCheck(unittest.TestCase):
         self.assertEqual(location['city'], 'Москва')
         self.assertEqual(location['country_id'], 185)
         self.assertEqual(location['country_iso'], 'RU')
-        self.assertEqual(location['lon'], 37.6154)
-        self.assertEqual(location['lat'], 55.742792)
-        self.assertEqual(location['fips'], '48')
-        self.assertEqual(location['region_id'], 5489)
+        self.assertEqual(location['lon'], 37.61556)
+        self.assertEqual(location['lat'], 55.75222)
+        self.assertEqual(location['fips'], '0')
+        self.assertEqual(location['region_id'], 0)
 
     def test_location_detailed(self):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE)
@@ -72,13 +74,13 @@ class GeoLocatorFileModeCheck(unittest.TestCase):
         self.assertEqual(location['city'], 'Москва')
         self.assertEqual(location['country_id'], 185)
         self.assertEqual(location['country_iso'], 'RU')
-        self.assertEqual(location['lon'], 37.6154)
-        self.assertEqual(location['lat'], 55.742792)
-        self.assertEqual(location['fips'], '48')
-        self.assertEqual(location['region_id'], 5489)
+        self.assertEqual(location['lon'], 37.61556)
+        self.assertEqual(location['lat'], 55.75222)
+        self.assertEqual(location['fips'], '0')
+        self.assertEqual(location['region_id'], 524894)
 
         self.assertEqual(location['region'], 'Москва')
-        self.assertEqual(location['tz'], '')
+        self.assertEqual(location['tz'], 'Europe/Moscow')
 
 
 class GeoLocatorMemoryModeCheck(unittest.TestCase):
@@ -101,10 +103,10 @@ class GeoLocatorMemoryModeCheck(unittest.TestCase):
         self.assertEqual(location['city'], 'Москва')
         self.assertEqual(location['country_id'], 185)
         self.assertEqual(location['country_iso'], 'RU')
-        self.assertEqual(location['lon'], 37.6154)
-        self.assertEqual(location['lat'], 55.742792)
-        self.assertEqual(location['fips'], '48')
-        self.assertEqual(location['region_id'], 5489)
+        self.assertEqual(location['lon'], 37.61556)
+        self.assertEqual(location['lat'], 55.75222)
+        self.assertEqual(location['fips'], '0')
+        self.assertEqual(location['region_id'], 0)
 
     def test_location_detailed(self):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE, pysyge.MODE_MEMORY)
@@ -124,13 +126,13 @@ class GeoLocatorMemoryModeCheck(unittest.TestCase):
         self.assertEqual(location['city'], 'Москва')
         self.assertEqual(location['country_id'], 185)
         self.assertEqual(location['country_iso'], 'RU')
-        self.assertEqual(location['lon'], 37.6154)
-        self.assertEqual(location['lat'], 55.742792)
-        self.assertEqual(location['fips'], '48')
-        self.assertEqual(location['region_id'], 5489)
+        self.assertEqual(location['lon'], 37.61556)
+        self.assertEqual(location['lat'], 55.75222)
+        self.assertEqual(location['fips'], '0')
+        self.assertEqual(location['region_id'], 524894)
 
         self.assertEqual(location['region'], 'Москва')
-        self.assertEqual(location['tz'], '')
+        self.assertEqual(location['tz'], 'Europe/Moscow')
 
 
 class GeoLocatorBatchModeCheck(unittest.TestCase):
@@ -153,10 +155,10 @@ class GeoLocatorBatchModeCheck(unittest.TestCase):
         self.assertEqual(location['city'], 'Москва')
         self.assertEqual(location['country_id'], 185)
         self.assertEqual(location['country_iso'], 'RU')
-        self.assertEqual(location['lon'], 37.6154)
-        self.assertEqual(location['lat'], 55.742792)
-        self.assertEqual(location['fips'], '48')
-        self.assertEqual(location['region_id'], 5489)
+        self.assertEqual(location['lon'], 37.61556)
+        self.assertEqual(location['lat'], 55.75222)
+        self.assertEqual(location['fips'], '0')
+        self.assertEqual(location['region_id'], 0)
 
     def test_location_detailed(self):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE, pysyge.MODE_BATCH)
@@ -176,13 +178,13 @@ class GeoLocatorBatchModeCheck(unittest.TestCase):
         self.assertEqual(location['city'], 'Москва')
         self.assertEqual(location['country_id'], 185)
         self.assertEqual(location['country_iso'], 'RU')
-        self.assertEqual(location['lon'], 37.6154)
-        self.assertEqual(location['lat'], 55.742792)
-        self.assertEqual(location['fips'], '48')
-        self.assertEqual(location['region_id'], 5489)
+        self.assertEqual(location['lon'], 37.61556)
+        self.assertEqual(location['lat'], 55.75222)
+        self.assertEqual(location['fips'], '0')
+        self.assertEqual(location['region_id'], 524894)
 
         self.assertEqual(location['region'], 'Москва')
-        self.assertEqual(location['tz'], '')
+        self.assertEqual(location['tz'], 'Europe/Moscow')
 
 
 if __name__ == '__main__':

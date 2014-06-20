@@ -1,3 +1,5 @@
+from __future__ import division
+from types import StringTypes
 from struct import unpack
 from socket import inet_aton
 from math import floor
@@ -15,76 +17,29 @@ class GeoLocatorException(Exception):
 
 class GeoLocator:
     _cc2iso = (
-        '', 'AP', 'EU', 'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AN', 'AO', 'AQ',
-        'AR', 'AS', 'AT', 'AU', 'AW', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BH',
-        'BI', 'BJ', 'BM', 'BN', 'BO', 'BR', 'BS', 'BT', 'BV', 'BW', 'BY', 'BZ', 'CA',
-        'CC', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CR', 'CU',
-        'CV', 'CX', 'CY', 'CZ', 'DE', 'DJ', 'DK', 'DM', 'DO', 'DZ', 'EC', 'EE', 'EG',
-        'EH', 'ER', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO', 'FR', 'FX', 'GA', 'GB',
-        'GD', 'GE', 'GF', 'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT',
-        'GU', 'GW', 'GY', 'HK', 'HM', 'HN', 'HR', 'HT', 'HU', 'ID', 'IE', 'IL', 'IN',
-        'IO', 'IQ', 'IR', 'IS', 'IT', 'JM', 'JO', 'JP', 'KE', 'KG', 'KH', 'KI', 'KM',
-        'KN', 'KP', 'KR', 'KW', 'KY', 'KZ', 'LA', 'LB', 'LC', 'LI', 'LK', 'LR', 'LS',
-        'LT', 'LU', 'LV', 'LY', 'MA', 'MC', 'MD', 'MG', 'MH', 'MK', 'ML', 'MM', 'MN',
-        'MO', 'MP', 'MQ', 'MR', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA',
-        'NC', 'NE', 'NF', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NU', 'NZ', 'OM', 'PA',
-        'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PS', 'PT', 'PW', 'PY',
-        'QA', 'RE', 'RO', 'RU', 'RW', 'SA', 'SB', 'SC', 'SD', 'SE', 'SG', 'SH', 'SI',
-        'SJ', 'SK', 'SL', 'SM', 'SN', 'SO', 'SR', 'ST', 'SV', 'SY', 'SZ', 'TC', 'TD',
-        'TF', 'TG', 'TH', 'TJ', 'TK', 'TM', 'TN', 'TO', 'TL', 'TR', 'TT', 'TV', 'TW',
-        'TZ', 'UA', 'UG', 'UM', 'US', 'UY', 'UZ', 'VA', 'VC', 'VE', 'VG', 'VI', 'VN',
-        'VU', 'WF', 'WS', 'YE', 'YT', 'RS', 'ZA', 'ZM', 'ME', 'ZW', 'A1', 'A2', 'O1',
-        'AX', 'GG', 'IM', 'JE', 'BL', 'MF'
-        )
-    _tz = (
-        '',  'Africa/Abidjan', 'Africa/Accra', 'Africa/Addis_Ababa', 'Africa/Algiers', 'Africa/Bamako', 'Africa/Banjul',
-        'Africa/Blantyre', 'Africa/Brazzaville', 'Africa/Bujumbura', 'Africa/Cairo', 'Africa/Casablanca', 'Africa/Ceuta',
-        'Africa/Conakry', 'Africa/Dakar', 'Africa/Dar_es_Salaam', 'Africa/Douala', 'Africa/Freetown', 'Africa/Gaborone',
-        'Africa/Harare', 'Africa/Johannesburg', 'Africa/Kampala', 'Africa/Khartoum', 'Africa/Kigali', 'Africa/Kinshasa',
-        'Africa/Lagos', 'Africa/Libreville', 'Africa/Luanda', 'Africa/Lubumbashi', 'Africa/Lusaka', 'Africa/Malabo',
-        'Africa/Maputo', 'Africa/Maseru', 'Africa/Mbabane', 'Africa/Mogadishu', 'Africa/Monrovia', 'Africa/Nairobi',
-        'Africa/Ndjamena', 'Africa/Niamey', 'Africa/Nouakchott', 'Africa/Ouagadougou', 'Africa/Porto-Novo', 'Africa/Tripoli',
-        'Africa/Tunis', 'Africa/Windhoek', 'America/Anchorage', 'America/Anguilla', 'America/Antigua', 'America/Araguaina',
-        'America/Argentina/Buenos_Aires', 'America/Argentina/Catamarca', 'America/Argentina/Cordoba', 'America/Argentina/Jujuy',
-        'America/Argentina/La_Rioja', 'America/Argentina/Mendoza', 'America/Argentina/Rio_Gallegos', 'America/Argentina/Salta',
-        'America/Argentina/San_Juan', 'America/Argentina/San_Luis', 'America/Argentina/Tucuman', 'America/Argentina/Ushuaia',
-        'America/Asuncion', 'America/Bahia', 'America/Bahia_Banderas', 'America/Barbados', 'America/Belem', 'America/Belize',
-        'America/Boa_Vista', 'America/Bogota', 'America/Campo_Grande', 'America/Cancun', 'America/Caracas', 'America/Chicago',
-        'America/Chihuahua', 'America/Costa_Rica', 'America/Cuiaba', 'America/Denver', 'America/Dominica', 'America/Edmonton',
-        'America/El_Salvador', 'America/Fortaleza', 'America/Godthab', 'America/Grenada', 'America/Guatemala', 'America/Guayaquil',
-        'America/Guyana', 'America/Halifax', 'America/Havana', 'America/Hermosillo', 'America/Indianapolis', 'America/Iqaluit',
-        'America/Jamaica', 'America/La_Paz', 'America/Lima', 'America/Los_Angeles', 'America/Maceio', 'America/Managua',
-        'America/Manaus', 'America/Matamoros', 'America/Mazatlan', 'America/Merida', 'America/Mexico_City', 'America/Moncton',
-        'America/Monterrey', 'America/Montevideo', 'America/Montreal', 'America/Nassau', 'America/New_York', 'America/Ojinaga',
-        'America/Panama', 'America/Paramaribo', 'America/Phoenix', 'America/Port_of_Spain', 'America/Port-au-Prince',
-        'America/Porto_Velho', 'America/Recife', 'America/Regina', 'America/Rio_Branco', 'America/Santo_Domingo',
-        'America/Sao_Paulo', 'America/St_Johns', 'America/St_Kitts', 'America/St_Lucia', 'America/St_Vincent',
-        'America/Tegucigalpa', 'America/Thule', 'America/Tijuana', 'America/Vancouver', 'America/Whitehorse', 'America/Winnipeg',
-        'America/Yellowknife', 'Asia/Aden', 'Asia/Almaty', 'Asia/Amman', 'Asia/Anadyr', 'Asia/Aqtau', 'Asia/Aqtobe', 'Asia/Baghdad',
-        'Asia/Bahrain', 'Asia/Baku', 'Asia/Bangkok', 'Asia/Beirut', 'Asia/Bishkek', 'Asia/Choibalsan', 'Asia/Chongqing',
-        'Asia/Colombo', 'Asia/Damascus', 'Asia/Dhaka', 'Asia/Dubai', 'Asia/Dushanbe', 'Asia/Harbin', 'Asia/Ho_Chi_Minh',
-        'Asia/Hong_Kong', 'Asia/Hovd', 'Asia/Irkutsk', 'Asia/Jakarta', 'Asia/Jayapura', 'Asia/Jerusalem', 'Asia/Kabul',
-        'Asia/Kamchatka', 'Asia/Karachi', 'Asia/Kashgar', 'Asia/Kolkata', 'Asia/Krasnoyarsk', 'Asia/Kuala_Lumpur', 'Asia/Kuching',
-        'Asia/Kuwait', 'Asia/Macau', 'Asia/Magadan', 'Asia/Makassar', 'Asia/Manila', 'Asia/Muscat', 'Asia/Nicosia', 'Asia/Novokuznetsk',
-        'Asia/Novosibirsk', 'Asia/Omsk', 'Asia/Oral', 'Asia/Phnom_Penh', 'Asia/Pontianak', 'Asia/Qatar', 'Asia/Qyzylorda', 'Asia/Riyadh',
-        'Asia/Sakhalin', 'Asia/Seoul', 'Asia/Shanghai', 'Asia/Singapore', 'Asia/Taipei', 'Asia/Tashkent', 'Asia/Tbilisi', 'Asia/Tehran',
-        'Asia/Thimphu', 'Asia/Tokyo', 'Asia/Ulaanbaatar', 'Asia/Urumqi', 'Asia/Vientiane', 'Asia/Vladivostok', 'Asia/Yakutsk',
-        'Asia/Yekaterinburg', 'Asia/Yerevan', 'Atlantic/Azores', 'Atlantic/Bermuda', 'Atlantic/Canary', 'Atlantic/Cape_Verde',
-        'Atlantic/Madeira', 'Atlantic/Reykjavik', 'Australia/Adelaide', 'Australia/Brisbane', 'Australia/Darwin', 'Australia/Hobart',
-        'Australia/Melbourne', 'Australia/Perth', 'Australia/Sydney', 'Chile/Santiago', 'Europe/Amsterdam', 'Europe/Andorra',
-        'Europe/Athens', 'Europe/Belgrade', 'Europe/Berlin', 'Europe/Bratislava', 'Europe/Brussels', 'Europe/Bucharest', 'Europe/Budapest',
-        'Europe/Chisinau', 'Europe/Copenhagen', 'Europe/Dublin', 'Europe/Gibraltar', 'Europe/Helsinki', 'Europe/Istanbul',
-        'Europe/Kaliningrad', 'Europe/Kiev', 'Europe/Lisbon', 'Europe/Ljubljana', 'Europe/London', 'Europe/Luxembourg', 'Europe/Madrid',
-        'Europe/Malta', 'Europe/Mariehamn', 'Europe/Minsk', 'Europe/Monaco', 'Europe/Moscow', 'Europe/Oslo', 'Europe/Paris',
-        'Europe/Prague', 'Europe/Riga', 'Europe/Rome', 'Europe/Samara', 'Europe/San_Marino', 'Europe/Sarajevo', 'Europe/Simferopol',
-        'Europe/Skopje', 'Europe/Sofia', 'Europe/Stockholm', 'Europe/Tallinn', 'Europe/Tirane', 'Europe/Uzhgorod', 'Europe/Vaduz',
-        'Europe/Vatican', 'Europe/Vienna', 'Europe/Vilnius', 'Europe/Volgograd', 'Europe/Warsaw', 'Europe/Yekaterinburg', 'Europe/Zagreb',
-        'Europe/Zaporozhye', 'Europe/Zurich', 'Indian/Antananarivo', 'Indian/Comoro', 'Indian/Mahe', 'Indian/Maldives', 'Indian/Mauritius',
-        'Pacific/Auckland', 'Pacific/Chatham', 'Pacific/Efate', 'Pacific/Fiji', 'Pacific/Galapagos', 'Pacific/Guadalcanal', 'Pacific/Honolulu',
-        'Pacific/Port_Moresby'
+        '', 'AP', 'EU', 'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'CW', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU',
+        'AW', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BM', 'BN', 'BO', 'BR', 'BS',
+        'BT', 'BV', 'BW', 'BY', 'BZ', 'CA', 'CC', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN',
+        'CO', 'CR', 'CU', 'CV', 'CX', 'CY', 'CZ', 'DE', 'DJ', 'DK', 'DM', 'DO', 'DZ', 'EC', 'EE', 'EG',
+        'EH', 'ER', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO', 'FR', 'SX', 'GA', 'GB', 'GD', 'GE', 'GF',
+        'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY', 'HK', 'HM', 'HN',
+        'HR', 'HT', 'HU', 'ID', 'IE', 'IL', 'IN', 'IO', 'IQ', 'IR', 'IS', 'IT', 'JM', 'JO', 'JP', 'KE',
+        'KG', 'KH', 'KI', 'KM', 'KN', 'KP', 'KR', 'KW', 'KY', 'KZ', 'LA', 'LB', 'LC', 'LI', 'LK', 'LR',
+        'LS', 'LT', 'LU', 'LV', 'LY', 'MA', 'MC', 'MD', 'MG', 'MH', 'MK', 'ML', 'MM', 'MN', 'MO', 'MP',
+        'MQ', 'MR', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA', 'NC', 'NE', 'NF', 'NG', 'NI',
+        'NL', 'NO', 'NP', 'NR', 'NU', 'NZ', 'OM', 'PA', 'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN',
+        'PR', 'PS', 'PT', 'PW', 'PY', 'QA', 'RE', 'RO', 'RU', 'RW', 'SA', 'SB', 'SC', 'SD', 'SE', 'SG',
+        'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'SN', 'SO', 'SR', 'ST', 'SV', 'SY', 'SZ', 'TC', 'TD', 'TF',
+        'TG', 'TH', 'TJ', 'TK', 'TM', 'TN', 'TO', 'TL', 'TR', 'TT', 'TV', 'TW', 'TZ', 'UA', 'UG', 'UM',
+        'US', 'UY', 'UZ', 'VA', 'VC', 'VE', 'VG', 'VI', 'VN', 'VU', 'WF', 'WS', 'YE', 'YT', 'RS', 'ZA',
+        'ZM', 'ME', 'ZW', 'A1', 'XK', 'O1', 'AX', 'GG', 'IM', 'JE', 'BL', 'MF', 'BQ', 'SS'
     )
     _batch_mode = False
     _memory_mode = False
+
+    _TYPE_COUNTRY = 0
+    _TYPE_REGION = 1
+    _TYPE_CITY = 2
 
     def __init__(self, db_file, mode=MODE_FILE):
         """Creates an interface to access Sypex Geo IP database data.
@@ -99,35 +54,45 @@ class GeoLocator:
         """
         self._fh = open(db_file, 'rb')
 
-        header = self._fh.read(32)
+        header = self._fh.read(40)
+
         if header[:3] != 'SxG':
             raise GeoLocatorException('Unable open file %s' % db_file)
 
         prolog = dict(zip(
             ('ver', 'ts', 'type', 'charset', 'b_idx_len',
              'm_idx_len', 'range', 'db_items', 'id_len', 'max_region',
-             'max_city', 'region_size', 'city_size'),
-            unpack('>BLBBBHHLBHHLL', header[3:])))
+             'max_city', 'region_size', 'city_size', 'max_country',
+             'country_size', 'pack_size'),
+            unpack('>BLBBBHHLBHHLLHLH', header[3:])))
 
-        if prolog['b_idx_len'] * prolog['m_idx_len'] * prolog['range'] * prolog['db_items'] *\
-           prolog['ts'] * prolog['id_len'] == 0:
+        if prolog['b_idx_len'] * prolog['m_idx_len'] * prolog['range'] * prolog['db_items'] * \
+                prolog['ts'] * prolog['id_len'] == 0:
             raise GeoLocatorException('Wrong file format %s' % db_file)
 
-        self._b_idx_str = self._fh.read(prolog['b_idx_len'] * 4)
         self._b_idx_len = prolog['b_idx_len']
-        self._m_idx_str = self._fh.read(prolog['m_idx_len'] * 4)
         self._m_idx_len = prolog['m_idx_len']
         self._db_items = prolog['db_items']
-        self._db_begin = self._fh.tell()
         self._range = prolog['range']
         self._id_len = prolog['id_len']
         self._block_len = self._id_len + 3
         self._max_region = prolog['max_region']
         self._max_city = prolog['max_city']
+        self._max_country = prolog['max_country']
+        self._country_size = prolog['country_size']
         self._batch_mode = mode & MODE_BATCH
         self._memory_mode = mode & MODE_MEMORY
         self._db_ver = prolog['ver']
         self._db_ts = prolog['ts']
+
+        if prolog['pack_size']:
+            self._pack = self._fh.read(prolog['pack_size']).split('\0')
+        else:
+            self._pack = ''
+
+        self._b_idx_str = self._fh.read(prolog['b_idx_len'] * 4)
+        self._m_idx_str = self._fh.read(prolog['m_idx_len'] * 4)
+        self._db_begin = self._fh.tell()
 
         if self._batch_mode:
             self._b_idx_set = unpack('>%dL' % self._b_idx_len, self._b_idx_str)
@@ -137,13 +102,19 @@ class GeoLocator:
 
         if self._memory_mode:
             self._db = self._fh.read(self._db_items * self._block_len)
-            self._db_regions = self._fh.read(prolog['region_size'])
-            self._db_cities = self._fh.read(prolog['city_size'])
+            self._db_regions = ''
+            self._db_cities = ''
+
+            if prolog['region_size']:
+                self._db_regions = self._fh.read(prolog['region_size'])
+
+            if prolog['city_size']:
+                self._db_cities = self._fh.read(prolog['city_size'])
+
             self._fh.close()
 
         self._info = {'regions_begin': self._db_begin + self._db_items * self._block_len}
         self._info['cities_begin'] = self._info['regions_begin'] + prolog['region_size']
-
 
     def _search_idx(self, ipn, min, max):
         if self._batch_mode:
@@ -242,44 +213,148 @@ class GeoLocator:
             self._fh.seek(self._db_begin + min * self._block_len)
             return self._search_db(self._fh.read(len * self._block_len), ipn, 0, len - 1)
 
-    def _parse_location_details(self, city):
-        region_seek = city['region_id']
-
-        if region_seek > 0:
+    def _read_data_chunk(self, data_type, start_pos, max_read):
+        raw = ''
+        if start_pos and max_read:
             if self._memory_mode:
-                region = self._db_regions[region_seek:self._max_region + region_seek].split('\0')
+                src = self._db_cities
+                if data_type == self._TYPE_REGION:
+                    src = self._db_regions
+                raw = src[start_pos:start_pos+max_read]
             else:
-                self._fh.seek(self._info['regions_begin'] + region_seek)
-                region = self._fh.read(self._max_region).split('\0')
-                
-            if region[0]:
-                city['region'] = region[0]
-            else:
-                city['region'] = ''
-                
-            if region[1]:
-                city['tz'] = self._tz[int(region[1])]
-            else:
-                city['tz'] = ''
+                boundary_key = 'cities_begin'
+                if data_type == self._TYPE_REGION:
+                    boundary_key = 'regions_begin'
+                self._fh.seek(self._info[boundary_key]+start_pos)
+                raw = self._fh.read(max_read)
+        return self._parse_pack(self._pack[data_type], raw)
+
+    def _parse_location(self, start_pos, detailed=False):
+        if not self._pack:
+            return False
+
+        country_only = False
+        if start_pos < self._country_size:
+            country = self._read_data_chunk(self._TYPE_COUNTRY, start_pos, self._max_country)  # TODO Recheck.
+            city = self._parse_pack(self._pack[2])
+            country_only = True
+            city['lat'] = country['lat']
+            city['lon'] = country['lon']
         else:
-            city['region'] = ''
-            city['tz'] = ''
-        return city
+            city = self._read_data_chunk(self._TYPE_CITY, start_pos, self._max_city)
+            country = {
+                'id': city['country_id'],
+                'iso': self._cc2iso[ city['country_id']]
+            }
 
-    def _parse_location(self, seek):
-        if self._memory_mode:
-            raw = self._db_cities[seek:self._max_city + seek]
-        else:
-            self._fh.seek(self._info['cities_begin'] + seek)
-            raw = self._fh.read(self._max_city)
+        region = None
+        if detailed:
+            region = self._read_data_chunk(self._TYPE_REGION, city['region_seek'], self._max_region)
 
-        city = dict(zip(('region_id', 'country_id', 'fips', 'lat', 'lon'), unpack('>LB2sLL', raw[:15])))
-        city['country_iso'] = self._cc2iso[city['country_id']]
-        city['lat'] /= float(1000000)
-        city['lon'] /= float(1000000)
-        city['city'] = raw[15:].split('\0', 2)[0]
+            if not country_only:
+                country = self._read_data_chunk(self._TYPE_COUNTRY, region['country_seek'], self._max_country)
 
-        return city
+        return self._structure_location_data(city, country, region)
+
+    def _structure_location_data(self, city, country, region):
+        del city['country_id']
+        del city['region_seek']
+        doc = {
+            'country_id': country['id'],
+            'country_iso': country['iso'],
+
+            'region_id': 0,
+
+            'city': city['name_ru'],
+            'lon': city['lon'],
+            'lat': city['lat'],
+            'fips': '0',  # Dropped in SypexGeo 2.2
+
+            'details': {
+                'city': city,
+                'region': region,
+                'country': country
+            }
+        }
+
+        if region is not None:
+            del region['country_seek']
+            doc['region'] = region['name_ru']
+            doc['region_id'] = region['id']
+            doc['tz'] = region.get('timezone', '')
+
+        return doc
+
+    def _parse_pack(self, pack, item=''):
+        result = {}
+        start_pos = 0
+        empty = not item
+
+        map_len = {
+            't': 1, 'T': 1,
+            's': 2, 'S': 2, 'n': 2,
+            'm': 3, 'M': 3,
+            'd': 8,
+            'c': lambda: int(chunk_type[1:]),
+            'b': lambda: item.find('\0', start_pos) - start_pos
+        }
+        map_val = {
+            't': lambda: unpack('b', val),
+            'T': lambda: unpack('B', val),
+            's': lambda: unpack('h', val),
+            'S': lambda: unpack('H', val),
+            'm': lambda: unpack('i', val),  # TODO unpack('i', val + (ord(val[2]) >> 7 ? '\xff' : '\0'))
+            'M': lambda: unpack('I', val + '\0'),
+            'i': lambda: unpack('i', val),
+            'I': lambda: unpack('I', val),
+            'f': lambda: unpack('f', val),
+            'd': lambda: unpack('d', val),
+            'n': lambda: unpack('h', val)[0] / pow(10, int(chunk_type[1])),
+            'N': lambda: unpack('i', val)[0] / pow(10, int(chunk_type[1])),
+            'c': lambda: val.rstrip(' '),
+        }
+
+        for chunk in pack.split('/'):
+            chunk_type, chunk_name = chunk.split(':')
+            type_letter = chunk_type[0]
+
+            if type_letter == 'c':
+                a = 1
+
+            if empty:
+                if type_letter == 'c':
+                    val = ''
+                else:
+                    val = 0
+                result[chunk_name] = type_letter == 'b' or val
+                continue
+
+            length = map_len.get(type_letter, 4)
+            try:
+                length = length()
+            except TypeError:
+                pass
+
+            end_pos = start_pos+length
+            val = item[start_pos:end_pos]
+            val_real = map_val.get(type_letter)
+
+            if val_real is None:  # case `b`
+                val_real = val
+                length += 1
+            else:
+                val_real = val_real()
+
+            start_pos += length
+
+            result[chunk_name] = val_real
+            if not isinstance(val_real, StringTypes):
+                try:
+                    result[chunk_name] = val_real[0]
+                except TypeError:
+                    pass
+
+        return result
 
     def get_db_version(self):
         return self._db_ver
@@ -295,9 +370,6 @@ class GeoLocator:
         """
         seek = self._get_pos(ip)
         if seek > 0:
-            location = self._parse_location(seek)
-            if detailed:
-                return self._parse_location_details(location)
-            return location
+            return self._parse_location(seek, detailed=detailed)
         else:
             return False

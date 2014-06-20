@@ -2,8 +2,12 @@ pysyge
 ======
 http://github.com/idlesign/pysyge
 
+.. image:: https://badge.fury.io/py/pysyge.png
+    :target: http://badge.fury.io/py/pysyge
+
 .. image:: https://pypip.in/d/pysyge/badge.png
         :target: https://crate.io/packages/pysyge
+
 
 What's that
 -----------
@@ -13,10 +17,18 @@ What's that
 For more information about Sypex Geo databases and their features please visit http://sypexgeo.net.
 
 
+
+Attention
+---------
+
+**This version of pysyge works with Sypex Geo DB version 2.2 or above.**
+
+
+
 Quickstart
 ----------
 
-Download Geo IP database file from http://sypexgeo.net/ (example below uses `SxGeoCity.dat` file).
+Download Geo IP database file from http://sypexgeo.net/ (example below uses `SxGeoCityMax.dat` file).
 
 Application sample::
 
@@ -24,15 +36,11 @@ Application sample::
     from pysyge import GeoLocator, MODE_BATCH, MODE_MEMORY
 
     # Create GeoLocator object to access API from 'SxGeoCity.dat' using fast memory mode.
-    geodata = GeoLocator('SxGeoCity.dat', MODE_BATCH | MODE_MEMORY)
+    geodata = GeoLocator('SxGeoCityMax.dat', MODE_BATCH | MODE_MEMORY)
 
     # Request geo information for 77.88.21.3 IP address.
     location = geodata.get_location('77.88.21.3', detailed=True)
 
     # Print out some lyrics.
-    print('%s (%s) calling. All the circuits are busy.' % (location['city'], location['country_iso']))
+    print('%s (%s) calling. All the circuits are busy.' % (location['details]['city']['name_en'], location['details']['country']['iso']))
 
-
-
-.. image:: https://d2weczhvl823v0.cloudfront.net/idlesign/pysyge/trend.png
-        :target: https://bitdeli.com/free
