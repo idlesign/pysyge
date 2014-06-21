@@ -25,13 +25,22 @@ Direct DB links that might became broken over time:
 
 
 
+Requirements
+------------
+
+Python 2.7+, 3.2+
+
+
+
 Attention
 ---------
 
-This version of pysyge works with **Sypex Geo DB version 2.2 or above**.
+1. This version of pysyge works with **Sypex Geo DB version 2.2 or above**.
 
-The structure of a dictionary returned by GeoLocator.get_location() was preserved in a backward compatible manner
-as much as possible, yet it's advised to update your code to use data from `info` sub dictionary.
+    The structure of a dictionary returned by GeoLocator.get_location() was preserved in a backward compatible manner
+    as much as possible, yet it's advised to update your code to use data from `info` sub dictionary.
+
+2. This version of pysyge works with **UTF-8 Sypex Geo Databases**. Texts returned by pysyge are UTF-8.
 
 
 

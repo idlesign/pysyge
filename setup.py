@@ -2,6 +2,7 @@ import os
 from setuptools import setup
 from pysyge import VERSION
 
+
 f = open(os.path.join(os.path.dirname(__file__), 'README.rst'))
 readme = f.read()
 f.close()
@@ -11,7 +12,7 @@ setup(
     version='.'.join(map(str, VERSION)),
     description='API to access data from Sypex Geo IP database files from your Python code',
     long_description=readme,
-    author="Igor 'idle sign' Starikov",
+    author='Igor `idle sign` Starikov',
     author_email='idlesign@yandex.ru',
     url='http://github.com/idlesign/pysyge',
     packages=['pysyge'],
@@ -26,5 +27,9 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
     ],
 )

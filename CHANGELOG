@@ -4,6 +4,7 @@ pysyge changelog
 
 v0.2.0
 ------
++ Added Python 3 support.
 + Restructured to work with Sypex Geo 2.2+ Databases (closes #3)
 
 
