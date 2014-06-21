@@ -52,7 +52,7 @@ Download Geo IP database file from http://sypexgeo.net/ (example below uses `SxG
 Application sample::
 
     # Import all we need from pysyge module.
-    from pysyge import GeoLocator, MODE_BATCH, MODE_MEMORY
+    from pysyge.pysyge import GeoLocator, MODE_BATCH, MODE_MEMORY
 
     # Create GeoLocator object to access API from 'SxGeoCityMax.dat' using fast memory mode.
     geodata = GeoLocator('SxGeoCityMax.dat', MODE_BATCH | MODE_MEMORY)
