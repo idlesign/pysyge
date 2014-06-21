@@ -19,9 +19,9 @@ For more information about Sypex Geo databases and their features please visit h
 
 Direct DB links that might became broken over time:
 
-    * Sypex Geo City DB - http://sypexgeo.net/files/SxGeoCity_utf8.zip
+  * Sypex Geo City DB - http://sypexgeo.net/files/SxGeoCity_utf8.zip
 
-    * Sypex Geo City Max DB - http://sypexgeo.net/files/SxGeoCityMax_utf8.zip
+  * Sypex Geo City Max DB - http://sypexgeo.net/files/SxGeoCityMax_utf8.zip
 
 
 
@@ -37,10 +37,10 @@ Attention
 
 1. This version of pysyge works with **Sypex Geo DB version 2.2 or above**.
 
-    The structure of a dictionary returned by GeoLocator.get_location() was preserved in a backward compatible manner
-    as much as possible, yet it's advised to update your code to use data from `info` sub dictionary.
+  The structure of a dictionary returned by GeoLocator.get_location() was preserved in a backward compatible manner
+  as much as possible, yet it's advised to update your code to use data from `info` sub dictionary.
 
-2. This version of pysyge works with **UTF-8 Sypex Geo Databases**. Texts returned by pysyge are UTF-8.
+2. This version of pysyge works with **UTF-8** Sypex Geo Databases. Texts returned by pysyge are **UTF-8**.
 
 
 
