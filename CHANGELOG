@@ -1,4 +1,12 @@
-v0.1.1
+pysyge changelog
+================
+
+
+v0.2.0
+------
++ Restructured to work with Sypex Geo 2.2+ Databases (closes #3)
+
+
 ------
 * Fixed region and tz index exceptions (see #1).
 
