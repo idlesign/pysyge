@@ -3,6 +3,7 @@ from struct import unpack
 from socket import inet_aton
 from math import floor
 from datetime import datetime
+from binascii import hexlify
 
 try:
     string_type = basestring
@@ -13,6 +14,14 @@ except NameError:
 MODE_FILE = 0
 MODE_MEMORY = 1
 MODE_BATCH = 2
+
+
+def chr_(val):  # py3 compatibility
+    try:
+        return chr(val)
+    except TypeError:
+        pass
+    return val
 
 
 class GeoLocatorException(Exception):
@@ -60,7 +69,7 @@ class GeoLocator:
 
         header = self._fh.read(40)
 
-        if header[:3] != 'SxG':
+        if header[:3] != b'SxG':
             raise GeoLocatorException('Unable open file %s' % db_file)
 
         prolog = dict(zip(
@@ -90,7 +99,7 @@ class GeoLocator:
         self._db_ts = prolog['ts']
 
         if prolog['pack_size']:
-            self._pack = self._fh.read(prolog['pack_size']).split('\0')
+            self._pack = self._fh.read(prolog['pack_size']).split(b'\0')
         else:
             self._pack = ''
 
@@ -172,7 +181,7 @@ class GeoLocator:
             return int(str_[start:start + 3].encode('hex'), 16)
 
         start = min_ * self._block_len - self._id_len
-        return int(str_[start:start + self._id_len].encode('hex'), 16)
+        return int(hexlify(str_[start:start + self._id_len]), 16)
 
     def _get_pos(self, ip):
         ip1oct = int(ip.split('.', 1)[0])
@@ -305,8 +314,8 @@ class GeoLocator:
             's': 2, 'S': 2, 'n': 2,
             'm': 3, 'M': 3,
             'd': 8,
-            'c': lambda: int(chunk_type[1:]),
-            'b': lambda: item.find('\0', start_pos) - start_pos
+            'c': lambda: int(chr_(chunk_type[1:])),
+            'b': lambda: item.find(b'\0', start_pos) - start_pos
         }
         map_val = {
             't': lambda: unpack('b', val),
@@ -314,19 +323,20 @@ class GeoLocator:
             's': lambda: unpack('h', val),
             'S': lambda: unpack('H', val),
             'm': lambda: unpack('i', val),  # TODO unpack('i', val + (ord(val[2]) >> 7 ? '\xff' : '\0'))
-            'M': lambda: unpack('I', val + '\0'),
+            'M': lambda: unpack('I', val + b'\0'),
             'i': lambda: unpack('i', val),
             'I': lambda: unpack('I', val),
             'f': lambda: unpack('f', val),
             'd': lambda: unpack('d', val),
-            'n': lambda: unpack('h', val)[0] / pow(10, int(chunk_type[1])),
-            'N': lambda: unpack('i', val)[0] / pow(10, int(chunk_type[1])),
-            'c': lambda: val.rstrip(' '),
+            'n': lambda: unpack('h', val)[0] / pow(10, int(chr_(chunk_type[1]))),
+            'N': lambda: unpack('i', val)[0] / pow(10, int(chr_(chunk_type[1]))),
+            'c': lambda: val.decode('utf-8').rstrip(' '),
         }
 
-        for chunk in pack.split('/'):
-            chunk_type, chunk_name = chunk.split(':')
-            type_letter = chunk_type[0]
+        for chunk in pack.split(b'/'):
+            chunk_type, chunk_name = chunk.split(b':')
+            chunk_name = chunk_name.decode('utf-8')
+            type_letter = chr_(chunk_type[0])
 
             if empty:
                 if type_letter == 'c':
@@ -353,6 +363,11 @@ class GeoLocator:
                 val_real = val_real()
 
             start_pos += length
+
+            try:
+                val_real = val_real.decode('utf-8')
+            except AttributeError:
+                pass
 
             result[chunk_name] = val_real
             if not isinstance(val_real, string_type):
