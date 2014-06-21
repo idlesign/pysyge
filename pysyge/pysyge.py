@@ -1,9 +1,13 @@
 from __future__ import division
-from types import StringTypes
 from struct import unpack
 from socket import inet_aton
 from math import floor
 from datetime import datetime
+
+try:
+    string_type = basestring
+except NameError:
+    string_type = str
 
 
 MODE_FILE = 0
@@ -116,59 +120,59 @@ class GeoLocator:
         self._info = {'regions_begin': self._db_begin + self._db_items * self._block_len}
         self._info['cities_begin'] = self._info['regions_begin'] + prolog['region_size']
 
-    def _search_idx(self, ipn, min, max):
+    def _search_idx(self, ipn, min_, max_):
         if self._batch_mode:
-            while (max - min) > 8:
-                offset = (min + max) >> 1
+            while (max_ - min_) > 8:
+                offset = (min_ + max_) >> 1
                 if ipn > self._m_idx_set[offset]:
-                    min = offset
+                    min_ = offset
                 else:
-                    max = offset
+                    max_ = offset
 
-            while ipn > self._m_idx_set[min]:
-                min += 1
-                if min >= max:
+            while ipn > self._m_idx_set[min_]:
+                min_ += 1
+                if min_ >= max_:
                     break
         else:
-            while (max - min) > 8:
-                offset = (min + max) >> 1
+            while (max_ - min_) > 8:
+                offset = (min_ + max_) >> 1
                 start = offset * 4
                 if ipn > self._m_idx_str[start:start + 4]:
-                    min = offset
+                    min_ = offset
                 else:
-                    max = offset
+                    max_ = offset
 
-            start = min * 4
+            start = min_ * 4
             while ipn > self._m_idx_str[start:start + 4]:
-                min += 1
-                start = min * 4
-                if min >= max:
+                min_ += 1
+                start = min_ * 4
+                if min_ > max_:
                     break
-        return min
+        return min_
 
-    def _search_db(self, str, ipn, min, max):
-        if (max - min) > 0:
+    def _search_db(self, str_, ipn, min_, max_):
+        if (max_ - min_) > 0:
             ipn = ipn[1:]
-            while (max - min) > 8:
-                offset = (min + max) >> 1
+            while (max_ - min_) > 8:
+                offset = (min_ + max_) >> 1
                 start = offset * self._block_len
-                if ipn > str[start:start + 3]:
-                    min = offset
+                if ipn > str_[start:start + 3]:
+                    min_ = offset
                 else:
-                    max = offset
+                    max_ = offset
 
-            start = min * self._block_len
-            while ipn >= str[start:start + 3]:
-                min += 1
-                start = min * self._block_len
-                if min >= max:
+            start = min_ * self._block_len
+            while ipn >= str_[start:start + 3]:
+                min_ += 1
+                start = min_ * self._block_len
+                if min_ >= max_:
                     break
         else:
-            start = min * self._block_len + 3
-            return int(str[start:start + 3].encode('hex'), 16)
+            start = min_ * self._block_len + 3
+            return int(str_[start:start + 3].encode('hex'), 16)
 
-        start = min * self._block_len - self._id_len
-        return int(str[start:start + self._id_len].encode('hex'), 16)
+        start = min_ * self._block_len - self._id_len
+        return int(str_[start:start + self._id_len].encode('hex'), 16)
 
     def _get_pos(self, ip):
         ip1oct = int(ip.split('.', 1)[0])
@@ -187,31 +191,35 @@ class GeoLocator:
             start = (ip1oct - 1) * 4
             blocks = dict(zip(('min', 'max'), unpack('>LL', self._b_idx_str[start:start + 8])))
 
-        part = self._search_idx(ipn, int(floor(blocks['min'] / self._range)), int(floor(blocks['max'] / self._range) - 1))
+        if blocks['max'] - blocks['min'] > self._range:
+            part = self._search_idx(ipn, int(floor(blocks['min'] / self._range)), int(floor(blocks['max'] / self._range) - 1))
 
-        if part > 0:
-            min = part * self._range
+            if part > 0:
+                min_ = part * self._range
+            else:
+                min_ = 0
+
+            if part > self._m_idx_len:
+                max_ = self._db_items
+            else:
+                max_ = (part + 1) * self._range
+
+            if min_ < blocks['min']:
+                min_ = blocks['min']
+
+            if max_ > blocks['max']:
+                max_ = blocks['max']
         else:
-            min = 0
+            min_ = blocks['min']
+            max_ = blocks['max']
 
-        if part > self._m_idx_len:
-            max = self._db_items
-        else:
-            max = (part + 1) * self._range
-
-        if min < blocks['min']:
-            min = blocks['min']
-
-        if max > blocks['max']:
-            max = blocks['max']
-
-        len = max - min
+        length = max_ - min_
 
         if self._memory_mode:
-            return self._search_db(self._db, ipn, min, max)
+            return self._search_db(self._db, ipn, min_, max_)
         else:
-            self._fh.seek(self._db_begin + min * self._block_len)
-            return self._search_db(self._fh.read(len * self._block_len), ipn, 0, len - 1)
+            self._fh.seek(self._db_begin + min_ * self._block_len)
+            return self._search_db(self._fh.read(length * self._block_len), ipn, 0, length - 1)
 
     def _read_data_chunk(self, data_type, start_pos, max_read):
         raw = ''
@@ -235,7 +243,8 @@ class GeoLocator:
 
         country_only = False
         if start_pos < self._country_size:
-            country = self._read_data_chunk(self._TYPE_COUNTRY, start_pos, self._max_country)  # TODO Recheck.
+            # TODO Appears to be a dead clause.
+            country = self._read_data_chunk(self._TYPE_COUNTRY, start_pos, self._max_country)
             city = self._parse_pack(self._pack[2])
             country_only = True
             city['lat'] = country['lat']
@@ -244,7 +253,7 @@ class GeoLocator:
             city = self._read_data_chunk(self._TYPE_CITY, start_pos, self._max_city)
             country = {
                 'id': city['country_id'],
-                'iso': self._cc2iso[ city['country_id']]
+                'iso': self._cc2iso[city['country_id']]
             }
 
         region = None
@@ -268,9 +277,9 @@ class GeoLocator:
             'city': city['name_ru'],
             'lon': city['lon'],
             'lat': city['lat'],
-            'fips': '0',  # Dropped in SypexGeo 2.2
+            'fips': '0',  # For backward compatibility. Dropped in SypexGeo 2.2.
 
-            'details': {
+            'info': {
                 'city': city,
                 'region': region,
                 'country': country
@@ -290,6 +299,7 @@ class GeoLocator:
         start_pos = 0
         empty = not item
 
+        # TODO Some of those seems to be unused.
         map_len = {
             't': 1, 'T': 1,
             's': 2, 'S': 2, 'n': 2,
@@ -318,9 +328,6 @@ class GeoLocator:
             chunk_type, chunk_name = chunk.split(':')
             type_letter = chunk_type[0]
 
-            if type_letter == 'c':
-                a = 1
-
             if empty:
                 if type_letter == 'c':
                     val = ''
@@ -348,7 +355,7 @@ class GeoLocator:
             start_pos += length
 
             result[chunk_name] = val_real
-            if not isinstance(val_real, StringTypes):
+            if not isinstance(val_real, string_type):
                 try:
                     result[chunk_name] = val_real[0]
                 except TypeError:
@@ -364,6 +371,7 @@ class GeoLocator:
 
     def get_location(self, ip, detailed=False):
         """Returns a dictionary with location data or False on failure.
+
         Amount of information about IP contained in the dictionary depends
         upon `detailed` flag state.
 
