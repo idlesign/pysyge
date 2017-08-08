@@ -64,5 +64,5 @@ Application sample::
     location = geodata.get_location('77.88.21.3', detailed=True)
 
     # Print out some lyrics. Most interesting data is under `info` in `city`, `country` and `region` dictionaries
-    print('%s (%s) calling. All the circuits are busy.' % (location['info]['city']['name_en'], location['info']['country']['iso']))
+    print('%s (%s) calling. All the circuits are busy.' % (location['info']['city']['name_en'], location['info']['country']['iso']))
 
