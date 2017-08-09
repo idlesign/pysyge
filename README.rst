@@ -49,7 +49,9 @@ Quickstart
 
 Download Geo IP database file from http://sypexgeo.net/ (example below uses `SxGeoCityMax.dat` file).
 
-Application sample::
+Application sample
+
+.. code-block:: python
 
     # Import all we need from pysyge module.
     from pysyge.pysyge import GeoLocator, MODE_BATCH, MODE_MEMORY
