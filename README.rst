@@ -2,11 +2,17 @@ pysyge
 ======
 http://github.com/idlesign/pysyge
 
-.. image:: https://badge.fury.io/py/pysyge.png
-    :target: http://badge.fury.io/py/pysyge
 
-.. image:: https://pypip.in/d/pysyge/badge.png
-        :target: https://crate.io/packages/pysyge
+|release| |stats|  |lic|
+
+.. |release| image:: https://img.shields.io/pypi/v/pysyge.svg
+    :target: https://pypi.python.org/pypi/uwsgiconf
+
+.. |stats| image:: https://img.shields.io/pypi/dm/pysyge.svg
+    :target: https://pypi.python.org/pypi/uwsgiconf
+
+.. |lic| image:: https://img.shields.io/pypi/l/pysyge.svg
+    :target: https://pypi.python.org/pypi/uwsgiconf
 
 
 
@@ -47,7 +53,7 @@ Attention
 Quickstart
 ----------
 
-Download Geo IP database file from http://sypexgeo.net/ (example below uses `SxGeoCityMax.dat` file).
+Download Geo IP database file from http://sypexgeo.net/ (example below uses ``SxGeoCityMax.dat`` file).
 
 Application sample
 
