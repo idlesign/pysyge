@@ -4,6 +4,7 @@ from socket import inet_aton
 from math import floor
 from datetime import datetime
 from binascii import hexlify
+from collections import Iterable
 
 try:
     string_type = basestring
@@ -391,8 +392,13 @@ class GeoLocator:
         upon `detailed` flag state.
 
         """
-        seek = self._get_pos(ip)
-        if seek > 0:
-            return self._parse_location(seek, detailed=detailed)
-        else:
-            return False
+        if type(ip) is str:
+            seek = self._get_pos(ip)
+            if seek > 0:
+                return self._parse_location(seek, detailed=detailed)
+            else:
+                return False
+        elif isinstance(ip, Iterable):
+            seek = map(self._get_pos, ip)
+            return [self._parse_location(elem, detailed=detailed) if elem > 0 \
+                    else False for elem in seek]
