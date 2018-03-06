@@ -392,7 +392,7 @@ class GeoLocator:
         upon `detailed` flag state.
 
         """
-        if type(ip) is str:
+        if isinstance(ip, str):
             seek = self._get_pos(ip)
             if seek > 0:
                 return self._parse_location(seek, detailed=detailed)
