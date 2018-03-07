@@ -392,13 +392,22 @@ class GeoLocator:
         upon `detailed` flag state.
 
         """
+        seek = self._get_pos(ip)
+        if seek > 0:
+            return self._parse_location(seek, detailed=detailed)
+        else:
+            return False
+
+    def get_locations(self, ip, detailed=False):
+        """Returns a list of dictionaries with location data or False 
+        on failure. Argument `ip` must be an iterable object.
+        
+        Amount of information about IP contained in the dictionary depends
+        upon `detailed` flag state.
+        """
         if isinstance(ip, str):
-            seek = self._get_pos(ip)
-            if seek > 0:
-                return self._parse_location(seek, detailed=detailed)
-            else:
-                return False
-        elif isinstance(ip, Iterable):
-            seek = map(self._get_pos, ip)
-            return [self._parse_location(elem, detailed=detailed) if elem > 0 \
+            ip = [ip]
+            
+        seek = map(self._get_pos, ip)
+        return [self._parse_location(elem, detailed=detailed) if elem > 0 \
                     else False for elem in seek]
