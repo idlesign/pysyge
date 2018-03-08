@@ -4,6 +4,7 @@ from socket import inet_aton
 from math import floor
 from datetime import datetime
 from binascii import hexlify
+from collections import Iterable
 
 try:
     string_type = basestring
@@ -396,3 +397,17 @@ class GeoLocator:
             return self._parse_location(seek, detailed=detailed)
         else:
             return False
+
+    def get_locations(self, ip, detailed=False):
+        """Returns a list of dictionaries with location data or False 
+        on failure. Argument `ip` must be an iterable object.
+        
+        Amount of information about IP contained in the dictionary depends
+        upon `detailed` flag state.
+        """
+        if isinstance(ip, str):
+            ip = [ip]
+            
+        seek = map(self._get_pos, ip)
+        return [self._parse_location(elem, detailed=detailed) if elem > 0 \
+                    else False for elem in seek]
