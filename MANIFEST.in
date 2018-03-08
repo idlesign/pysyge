@@ -3,7 +3,6 @@ include LICENSE
 include AUTHORS
 include CHANGELOG
 
-recursive-include bin *
 recursive-include tests *
 
 recursive-exclude * __pycache__

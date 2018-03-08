@@ -16,7 +16,7 @@ class GeoLocatorBasicCheck(unittest.TestCase):
         self.assertRaises(IOError, pysyge.GeoLocator, 'nosuchfile.dat')
 
     def test_wrong_file(self):
-        self.assertRaises(pysyge.GeoLocatorException, pysyge.GeoLocator, 'tests/runtests.py')
+        self.assertRaises(pysyge.GeoLocatorException, pysyge.GeoLocator, 'tests/test_module.py')
 
     def test_db_version(self):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE)
@@ -185,7 +185,3 @@ class GeoLocatorBatchModeCheck(unittest.TestCase):
 
         self.assertEqual(location['region'], u'Москва')
         self.assertEqual(location['tz'], 'Europe/Moscow')
-
-
-if __name__ == '__main__':
-    unittest.main()

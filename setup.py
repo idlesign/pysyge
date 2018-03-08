@@ -1,35 +1,61 @@
+import io
 import os
-from setuptools import setup
-from pysyge import VERSION
+import re
+import sys
+
+from setuptools import setup, find_packages
+
+PATH_BASE = os.path.dirname(__file__)
+PYTEST_RUNNER = ['pytest-runner'] if 'test' in sys.argv else []
 
 
-f = open(os.path.join(os.path.dirname(__file__), 'README.rst'))
-readme = f.read()
-f.close()
+def read_file(fpath):
+    """Reads a file within package directories."""
+    with io.open(os.path.join(PATH_BASE, fpath)) as f:
+        return f.read()
+
+
+def get_version():
+    """Returns version number, without module import (which can lead to ImportError
+    if some dependencies are unavailable before install."""
+    contents = read_file(os.path.join('pysyge', '__init__.py'))
+    version = re.search('VERSION = \(([^)]+)\)', contents)
+    version = version.group(1).replace(', ', '.').strip()
+    return version
+
 
 setup(
     name='pysyge',
-    version='.'.join(map(str, VERSION)),
+    version=get_version(),
+    url='http://github.com/idlesign/pysyge',
+
     description='API to access data from Sypex Geo IP database files from your Python code',
-    long_description=readme,
+    long_description=read_file('README.rst'),
+    license='BSD 3-Clause License',
+
     author='Igor `idle sign` Starikov',
     author_email='idlesign@yandex.ru',
-    url='http://github.com/idlesign/pysyge',
-    packages=['pysyge'],
+
+    packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
+
+    setup_requires=[] + PYTEST_RUNNER,
+    tests_require=['pytest'],
+
+    test_suite='tests',
+
     classifiers=[
+        # As in https://pypi.python.org/pypi?:action=list_classifiers
         'Development Status :: 4 - Beta',
-        'Environment :: Web Environment',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'License :: OSI Approved :: BSD License'
     ],
 )
