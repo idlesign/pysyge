@@ -3,16 +3,13 @@ pysyge
 http://github.com/idlesign/pysyge
 
 
-|release| |stats|  |lic|
+|release| |lic|
 
 .. |release| image:: https://img.shields.io/pypi/v/pysyge.svg
-    :target: https://pypi.python.org/pypi/uwsgiconf
-
-.. |stats| image:: https://img.shields.io/pypi/dm/pysyge.svg
-    :target: https://pypi.python.org/pypi/uwsgiconf
+    :target: https://pypi.python.org/pypi/pysyge
 
 .. |lic| image:: https://img.shields.io/pypi/l/pysyge.svg
-    :target: https://pypi.python.org/pypi/uwsgiconf
+    :target: https://pypi.python.org/pypi/pysyge
 
 
 
@@ -60,7 +57,7 @@ Application sample
 .. code-block:: python
 
     # Import all we need from pysyge module.
-    from pysyge.pysyge import GeoLocator, MODE_BATCH, MODE_MEMORY
+    from pysyge import GeoLocator, MODE_BATCH, MODE_MEMORY
 
     # Create GeoLocator object to access API
     # from 'SxGeoCityMax.dat' using fast memory mode.
