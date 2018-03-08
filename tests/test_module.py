@@ -82,6 +82,9 @@ class GeoLocatorFileModeCheck(unittest.TestCase):
         self.assertEqual(location['region'], u'Москва')
         self.assertEqual(location['tz'], 'Europe/Moscow')
 
+        locations = geodata.get_locations(BASE_IP)
+        assert locations[0]['country_iso'] == 'RU'
+
 
 class GeoLocatorMemoryModeCheck(unittest.TestCase):
 

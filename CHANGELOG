@@ -4,6 +4,7 @@ pysyge changelog
 
 Unreleased
 ----------
++ Added GeoLocator.get_locations() method.
 + GeoLocator can be imported from package root.
 
 

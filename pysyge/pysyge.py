@@ -1,10 +1,10 @@
 from __future__ import division
-from struct import unpack
-from socket import inet_aton
-from math import floor
-from datetime import datetime
+
 from binascii import hexlify
-from collections import Iterable
+from datetime import datetime
+from math import floor
+from socket import inet_aton
+from struct import unpack
 
 try:
     string_type = basestring
@@ -26,10 +26,11 @@ def chr_(val):  # py3 compatibility
 
 
 class GeoLocatorException(Exception):
-    pass
+    """Basic pysyge GeoLocator exception."""
 
 
-class GeoLocator:
+class GeoLocator(object):
+
     _cc2iso = (
         '', 'AP', 'EU', 'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'CW', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU',
         'AW', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BM', 'BN', 'BO', 'BR', 'BS',
@@ -409,5 +410,6 @@ class GeoLocator:
             ip = [ip]
             
         seek = map(self._get_pos, ip)
-        return [self._parse_location(elem, detailed=detailed) if elem > 0 \
-                    else False for elem in seek]
+        return [
+            self._parse_location(elem, detailed=detailed) if elem > 0 else False
+            for elem in seek]
