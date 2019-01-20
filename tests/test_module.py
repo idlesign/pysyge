@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-from pysyge import pysyge
-import unittest
 import datetime
+import unittest
 
+from pysyge import pysyge
 
-# DATABASE_CITY_FILE = 'SxGeo.dat'  # от 2014.06.04
-# DATABASE_CITY_FILE = 'SxGeoCity.dat'  # от 2014.06.04
-DATABASE_CITY_FILE = 'db/SxGeoCityMax.dat'  # от 2014.06.04
-BASE_IP = '77.88.21.3'
+DATABASE_CITY_FILE = 'SxGeoCity.dat'
+BASE_IP = '77.88.55.80'  # Yandex
 
 
 class GeoLocatorBasicCheck(unittest.TestCase):
@@ -80,7 +78,6 @@ class GeoLocatorFileModeCheck(unittest.TestCase):
         self.assertEqual(location['region_id'], 524894)
 
         self.assertEqual(location['region'], u'Москва')
-        self.assertEqual(location['tz'], 'Europe/Moscow')
 
         locations = geodata.get_locations(BASE_IP)
         assert locations[0]['country_iso'] == 'RU'
@@ -135,7 +132,6 @@ class GeoLocatorMemoryModeCheck(unittest.TestCase):
         self.assertEqual(location['region_id'], 524894)
 
         self.assertEqual(location['region'], u'Москва')
-        self.assertEqual(location['tz'], 'Europe/Moscow')
 
 
 class GeoLocatorBatchModeCheck(unittest.TestCase):
@@ -187,4 +183,3 @@ class GeoLocatorBatchModeCheck(unittest.TestCase):
         self.assertEqual(location['region_id'], 524894)
 
         self.assertEqual(location['region'], u'Москва')
-        self.assertEqual(location['tz'], 'Europe/Moscow')
