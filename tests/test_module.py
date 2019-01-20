@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 import datetime
-import unittest
+
+import pytest
 
 from pysyge import pysyge
 
@@ -8,178 +11,96 @@ DATABASE_CITY_FILE = 'SxGeoCity.dat'
 BASE_IP = '77.88.55.80'  # Yandex
 
 
-class GeoLocatorBasicCheck(unittest.TestCase):
+class TestGeoLocatorBasicCheck(object):
 
     def test_file_not_found(self):
-        self.assertRaises(IOError, pysyge.GeoLocator, 'nosuchfile.dat')
+
+        with pytest.raises(IOError):
+            pysyge.GeoLocator('nosuchfile.dat')
 
     def test_wrong_file(self):
-        self.assertRaises(pysyge.GeoLocatorException, pysyge.GeoLocator, 'tests/test_module.py')
+
+        with pytest.raises(pysyge.GeoLocatorException):
+            pysyge.GeoLocator('tests/test_module.py')
 
     def test_db_version(self):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE)
-        self.assertGreaterEqual(geodata.get_db_version(), 21)
+        assert geodata.get_db_version() >= 21
 
     def test_db_date(self):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE)
-        self.assertIsInstance(geodata.get_db_date(), datetime.datetime)
+        assert isinstance(geodata.get_db_date(), datetime.datetime)
 
     def test_localhost(self):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE)
-        self.assertEqual(geodata.get_location('127.0.0.1'), False)
+        assert geodata.get_location('127.0.0.1') is False
 
 
-class GeoLocatorFileModeCheck(unittest.TestCase):
+def assert_location(location, detailed=False):
+    assert 'city' in location
+    assert 'country_id' in location
+    assert 'country_iso' in location
+    assert 'lon' in location
+    assert 'lat' in location
+    assert 'fips' in location
+    assert 'region_id' in location
+
+    assert location['city'] == 'Москва'
+    assert location['country_id'] == 185
+    assert location['country_iso'] == 'RU'
+    assert location['lon'] == 37.61556
+    assert location['lat'] == 55.75222
+    assert location['fips'] == '0'
+
+    if detailed:
+        assert 'region' in location
+        assert 'tz' in location
+        assert location['region_id'] == 524894
+        assert location['region'] == 'Москва'
+
+    else:
+        assert 'region' not in location
+        assert 'tz' not in location
+        assert location['region_id'] == 0
+
+
+class TestGeoLocatorFileModeCheck(object):
 
     def test_location_basic(self):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE)
-
         location = geodata.get_location(BASE_IP)
-        self.assertIn('city', location)
-        self.assertIn('country_id', location)
-        self.assertIn('country_iso', location)
-        self.assertIn('lon', location)
-        self.assertIn('lat', location)
-        self.assertIn('fips', location)
-        self.assertIn('region_id', location)
-
-        self.assertNotIn('region', location)
-        self.assertNotIn('tz', location)
-
-        self.assertEqual(location['city'], u'Москва')
-        self.assertEqual(location['country_id'], 185)
-        self.assertEqual(location['country_iso'], 'RU')
-        self.assertEqual(location['lon'], 37.61556)
-        self.assertEqual(location['lat'], 55.75222)
-        self.assertEqual(location['fips'], '0')
-        self.assertEqual(location['region_id'], 0)
+        assert_location(location)
 
     def test_location_detailed(self):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE)
-
         location = geodata.get_location(BASE_IP, detailed=True)
-        self.assertIn('city', location)
-        self.assertIn('country_id', location)
-        self.assertIn('country_iso', location)
-        self.assertIn('lon', location)
-        self.assertIn('lat', location)
-        self.assertIn('fips', location)
-        self.assertIn('region_id', location)
-
-        self.assertIn('region', location)
-        self.assertIn('tz', location)
-
-        self.assertEqual(location['city'], u'Москва')
-        self.assertEqual(location['country_id'], 185)
-        self.assertEqual(location['country_iso'], 'RU')
-        self.assertEqual(location['lon'], 37.61556)
-        self.assertEqual(location['lat'], 55.75222)
-        self.assertEqual(location['fips'], '0')
-        self.assertEqual(location['region_id'], 524894)
-
-        self.assertEqual(location['region'], u'Москва')
+        assert_location(location, detailed=True)
 
         locations = geodata.get_locations(BASE_IP)
         assert locations[0]['country_iso'] == 'RU'
 
 
-class GeoLocatorMemoryModeCheck(unittest.TestCase):
+class TestGeoLocatorMemoryModeCheck(object):
 
     def test_location_basic(self):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE, pysyge.MODE_MEMORY)
-
         location = geodata.get_location(BASE_IP)
-        self.assertIn('city', location)
-        self.assertIn('country_id', location)
-        self.assertIn('country_iso', location)
-        self.assertIn('lon', location)
-        self.assertIn('lat', location)
-        self.assertIn('fips', location)
-        self.assertIn('region_id', location)
-
-        self.assertNotIn('region', location)
-        self.assertNotIn('tz', location)
-
-        self.assertEqual(location['city'], u'Москва')
-        self.assertEqual(location['country_id'], 185)
-        self.assertEqual(location['country_iso'], 'RU')
-        self.assertEqual(location['lon'], 37.61556)
-        self.assertEqual(location['lat'], 55.75222)
-        self.assertEqual(location['fips'], '0')
-        self.assertEqual(location['region_id'], 0)
+        assert_location(location)
 
     def test_location_detailed(self):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE, pysyge.MODE_MEMORY)
-
         location = geodata.get_location(BASE_IP, detailed=True)
-        self.assertIn('city', location)
-        self.assertIn('country_id', location)
-        self.assertIn('country_iso', location)
-        self.assertIn('lon', location)
-        self.assertIn('lat', location)
-        self.assertIn('fips', location)
-        self.assertIn('region_id', location)
-
-        self.assertIn('region', location)
-        self.assertIn('tz', location)
-
-        self.assertEqual(location['city'], u'Москва')
-        self.assertEqual(location['country_id'], 185)
-        self.assertEqual(location['country_iso'], 'RU')
-        self.assertEqual(location['lon'], 37.61556)
-        self.assertEqual(location['lat'], 55.75222)
-        self.assertEqual(location['fips'], '0')
-        self.assertEqual(location['region_id'], 524894)
-
-        self.assertEqual(location['region'], u'Москва')
+        assert_location(location, detailed=True)
 
 
-class GeoLocatorBatchModeCheck(unittest.TestCase):
+class TestGeoLocatorBatchModeCheck(object):
 
     def test_location_basic(self):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE, pysyge.MODE_BATCH)
-
         location = geodata.get_location(BASE_IP)
-        self.assertIn('city', location)
-        self.assertIn('country_id', location)
-        self.assertIn('country_iso', location)
-        self.assertIn('lon', location)
-        self.assertIn('lat', location)
-        self.assertIn('fips', location)
-        self.assertIn('region_id', location)
-
-        self.assertNotIn('region', location)
-        self.assertNotIn('tz', location)
-
-        self.assertEqual(location['city'], u'Москва')
-        self.assertEqual(location['country_id'], 185)
-        self.assertEqual(location['country_iso'], 'RU')
-        self.assertEqual(location['lon'], 37.61556)
-        self.assertEqual(location['lat'], 55.75222)
-        self.assertEqual(location['fips'], '0')
-        self.assertEqual(location['region_id'], 0)
+        assert_location(location)
 
     def test_location_detailed(self):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE, pysyge.MODE_BATCH)
-
         location = geodata.get_location(BASE_IP, detailed=True)
-        self.assertIn('city', location)
-        self.assertIn('country_id', location)
-        self.assertIn('country_iso', location)
-        self.assertIn('lon', location)
-        self.assertIn('lat', location)
-        self.assertIn('fips', location)
-        self.assertIn('region_id', location)
-
-        self.assertIn('region', location)
-        self.assertIn('tz', location)
-
-        self.assertEqual(location['city'], u'Москва')
-        self.assertEqual(location['country_id'], 185)
-        self.assertEqual(location['country_iso'], 'RU')
-        self.assertEqual(location['lon'], 37.61556)
-        self.assertEqual(location['lat'], 55.75222)
-        self.assertEqual(location['fips'], '0')
-        self.assertEqual(location['region_id'], 524894)
-
-        self.assertEqual(location['region'], u'Москва')
+        assert_location(location, detailed=True)
