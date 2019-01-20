@@ -132,7 +132,9 @@ class GeoLocator(object):
         self._info['cities_begin'] = self._info['regions_begin'] + prolog['region_size']
 
     def _search_idx(self, ipn, min_, max_):
+
         if self._batch_mode:
+
             while (max_ - min_) > 8:
                 offset = (min_ + max_) >> 1
                 if ipn > self._m_idx_set[offset]:
@@ -144,6 +146,7 @@ class GeoLocator(object):
                 min_ += 1
                 if min_ >= max_:
                     break
+
         else:
             while (max_ - min_) > 8:
                 offset = (min_ + max_) >> 1
@@ -159,9 +162,11 @@ class GeoLocator(object):
                 start = min_ * 4
                 if min_ > max_:
                     break
+
         return min_
 
     def _search_db(self, str_, ipn, min_, max_):
+
         if (max_ - min_) > 0:
             ipn = ipn[1:]
             while (max_ - min_) > 8:
@@ -179,6 +184,7 @@ class GeoLocator(object):
                 if min_ >= max_:
                     break
         else:
+
             start = min_ * self._block_len + 3
             return int(str_[start:start + 3].encode('hex'), 16)
 
@@ -203,7 +209,9 @@ class GeoLocator(object):
             blocks = dict(zip(('min', 'max'), unpack('>LL', self._b_idx_str[start:start + 8])))
 
         if blocks['max'] - blocks['min'] > self._range:
-            part = self._search_idx(ipn, int(floor(blocks['min'] / self._range)), int(floor(blocks['max'] / self._range) - 1))
+
+            part = self._search_idx(
+                ipn, int(floor(blocks['min'] / self._range)), int(floor(blocks['max'] / self._range) - 1))
 
             if part > 0:
                 min_ = part * self._range
@@ -228,27 +236,37 @@ class GeoLocator(object):
 
         if self._memory_mode:
             return self._search_db(self._db, ipn, min_, max_)
-        else:
-            self._fh.seek(self._db_begin + min_ * self._block_len)
-            return self._search_db(self._fh.read(length * self._block_len), ipn, 0, length - 1)
+
+        self._fh.seek(self._db_begin + min_ * self._block_len)
+
+        return self._search_db(self._fh.read(length * self._block_len), ipn, 0, length - 1)
 
     def _read_data_chunk(self, data_type, start_pos, max_read):
         raw = ''
+
         if start_pos and max_read:
+
             if self._memory_mode:
                 src = self._db_cities
+
                 if data_type == self._TYPE_REGION:
                     src = self._db_regions
+
                 raw = src[start_pos:start_pos+max_read]
+
             else:
                 boundary_key = 'cities_begin'
+
                 if data_type == self._TYPE_REGION:
                     boundary_key = 'regions_begin'
+
                 self._fh.seek(self._info[boundary_key]+start_pos)
                 raw = self._fh.read(max_read)
+
         return self._parse_pack(self._pack[data_type], raw)
 
     def _parse_location(self, start_pos, detailed=False):
+
         if not self._pack:
             return False
 
@@ -260,6 +278,7 @@ class GeoLocator(object):
             country_only = True
             city['lat'] = country['lat']
             city['lon'] = country['lon']
+
         else:
             city = self._read_data_chunk(self._TYPE_CITY, start_pos, self._max_city)
             country = {
@@ -277,8 +296,10 @@ class GeoLocator(object):
         return self._structure_location_data(city, country, region)
 
     def _structure_location_data(self, city, country, region):
+
         del city['country_id']
         del city['region_seek']
+
         doc = {
             'country_id': country['id'],
             'country_iso': country['iso'],
@@ -341,10 +362,8 @@ class GeoLocator(object):
             type_letter = chr_(chunk_type[0])
 
             if empty:
-                if type_letter == 'c':
-                    val = ''
-                else:
-                    val = 0
+
+                val = '' if type_letter == 'c' else 0
                 result[chunk_name] = type_letter == 'b' or val
                 continue
 
@@ -394,10 +413,11 @@ class GeoLocator(object):
 
         """
         seek = self._get_pos(ip)
+
         if seek > 0:
             return self._parse_location(seek, detailed=detailed)
-        else:
-            return False
+
+        return False
 
     def get_locations(self, ip, detailed=False):
         """Returns a list of dictionaries with location data or False 
@@ -410,6 +430,5 @@ class GeoLocator(object):
             ip = [ip]
             
         seek = map(self._get_pos, ip)
-        return [
-            self._parse_location(elem, detailed=detailed) if elem > 0 else False
-            for elem in seek]
+
+        return [self._parse_location(elem, detailed=detailed) if elem > 0 else False for elem in seek]
