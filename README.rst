@@ -29,7 +29,7 @@ Direct DB link that might became broken over time:
 Requirements
 ------------
 
-Python 2.7+, 3.2+
+* Python 2.7+, 3.5+
 
 
 
