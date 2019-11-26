@@ -186,7 +186,7 @@ class GeoLocator(object):
         else:
 
             start = min_ * self._block_len + 3
-            return int(str_[start:start + 3].encode('hex'), 16)
+            return int(str_[start:start + 3].hex(), 16)
 
         start = min_ * self._block_len - self._id_len
         return int(hexlify(str_[start:start + self._id_len]), 16)
