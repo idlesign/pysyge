@@ -17,6 +17,14 @@ MODE_MEMORY = 1
 MODE_BATCH = 2
 
 
+def bytes_to_hex_(val):  # type: (bytes) -> str
+    """Converts bytes to hex string
+    :param val: bytes string to convert
+    :return: Hex string
+    """
+    return val.hex() if hasattr(val, 'hex') else val.encode('hex')
+
+
 def chr_(val):  # py3 compatibility
     try:
         return chr(val)
@@ -186,7 +194,8 @@ class GeoLocator(object):
         else:
 
             start = min_ * self._block_len + 3
-            return int(str_[start:start + 3].hex(), 16)
+            hex_str = bytes_to_hex_(str_[start:start + 3])
+            return int(hex_str, 16)
 
         start = min_ * self._block_len - self._id_len
         return int(hexlify(str_[start:start + self._id_len]), 16)

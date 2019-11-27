@@ -6,6 +6,7 @@ import datetime
 import pytest
 
 from pysyge import pysyge
+from pysyge.pysyge import bytes_to_hex_
 
 DATABASE_CITY_FILE = 'SxGeoCity.dat'
 BASE_IP = '77.88.55.80'  # Yandex
@@ -104,3 +105,8 @@ class TestGeoLocatorBatchModeCheck(object):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE, pysyge.MODE_BATCH)
         location = geodata.get_location(BASE_IP, detailed=True)
         assert_location(location, detailed=True)
+
+
+class TestHexConversion(object):
+    def test_hex_conversion(self):
+        assert 'f0f1f2' == bytes_to_hex_(b'\xf0\xf1\xf2')
