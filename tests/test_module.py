@@ -4,12 +4,23 @@ from __future__ import unicode_literals
 import datetime
 
 import pytest
+from os import path
 
 from pysyge import pysyge
 from pysyge.pysyge import bytes_to_hex_
 
-DATABASE_CITY_FILE = 'SxGeoCity.dat'
+
+DIR_CURRENT = path.dirname(__file__)
+DATABASE_CITY_FILE = path.join(DIR_CURRENT, 'SxGeoCity.dat')  # 2019-11-19
 BASE_IP = '77.88.55.80'  # Yandex
+
+
+def test_quirks():
+    loc = pysyge.GeoLocator(DATABASE_CITY_FILE, pysyge.MODE_MEMORY)
+    result = loc.get_location('49.206.213.75', detailed=True)
+    assert result['country_iso'] == 'US'
+    assert result['tz'] == ''
+    assert result['info']['country']['name_en'] == 'United States'
 
 
 class TestGeoLocatorBasicCheck(object):
@@ -22,7 +33,7 @@ class TestGeoLocatorBasicCheck(object):
     def test_wrong_file(self):
 
         with pytest.raises(pysyge.GeoLocatorException):
-            pysyge.GeoLocator('tests/test_module.py')
+            pysyge.GeoLocator(path.join(DIR_CURRENT, 'test_module.py'))
 
     def test_db_version(self):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE)
