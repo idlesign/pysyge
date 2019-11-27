@@ -9,6 +9,7 @@ from struct import unpack
 
 try:
     string_type = basestring
+
 except NameError:
     string_type = str
 
@@ -109,10 +110,7 @@ class GeoLocator(object):
         self._db_ver = prolog['ver']
         self._db_ts = prolog['ts']
 
-        if prolog['pack_size']:
-            self._pack = self._fh.read(prolog['pack_size']).split(b'\0')
-        else:
-            self._pack = ''
+        self._pack = self._fh.read(prolog['pack_size']).split(b'\0') if prolog['pack_size'] else ''
 
         self._b_idx_str = self._fh.read(prolog['b_idx_len'] * 4)
         self._m_idx_str = self._fh.read(prolog['m_idx_len'] * 4)
@@ -143,32 +141,46 @@ class GeoLocator(object):
     def _search_idx(self, ipn, min_, max_):
 
         if self._batch_mode:
+            m_idx = self._m_idx_set
 
             while (max_ - min_) > 8:
+
                 offset = (min_ + max_) >> 1
-                if ipn > self._m_idx_set[offset]:
+
+                if ipn > m_idx[offset]:
                     min_ = offset
+
                 else:
                     max_ = offset
 
-            while ipn > self._m_idx_set[min_]:
+            while ipn > m_idx[min_]:
+
                 min_ += 1
+
                 if min_ >= max_:
                     break
 
         else:
+            m_idx = self._m_idx_str
+
             while (max_ - min_) > 8:
+
                 offset = (min_ + max_) >> 1
                 start = offset * 4
-                if ipn > self._m_idx_str[start:start + 4]:
+
+                if ipn > m_idx[start:start + 4]:
                     min_ = offset
+
                 else:
                     max_ = offset
 
             start = min_ * 4
-            while ipn > self._m_idx_str[start:start + 4]:
+
+            while ipn > m_idx[start:start + 4]:
+
                 min_ += 1
                 start = min_ * 4
+
                 if min_ > max_:
                     break
 
@@ -176,68 +188,78 @@ class GeoLocator(object):
 
     def _search_db(self, str_, ipn, min_, max_):
 
-        if (max_ - min_) > 0:
-            ipn = ipn[1:]
-            while (max_ - min_) > 8:
-                offset = (min_ + max_) >> 1
-                start = offset * self._block_len
-                if ipn > str_[start:start + 3]:
-                    min_ = offset
-                else:
-                    max_ = offset
+        len_block = self._block_len
 
-            start = min_ * self._block_len
-            while ipn >= str_[start:start + 3]:
-                min_ += 1
-                start = min_ * self._block_len
-                if min_ >= max_:
-                    break
-        else:
+        if (max_ - min_) <= 0:
 
-            start = min_ * self._block_len + 3
+            start = min_ * len_block + 3
             hex_str = bytes_to_hex_(str_[start:start + 3])
             return int(hex_str, 16)
 
-        start = min_ * self._block_len - self._id_len
-        return int(hexlify(str_[start:start + self._id_len]), 16)
+        ipn = ipn[1:]
+
+        while (max_ - min_) > 8:
+
+            offset = (min_ + max_) >> 1
+            start = offset * len_block
+
+            if ipn > str_[start:start + 3]:
+                min_ = offset
+
+            else:
+                max_ = offset
+
+        start = min_ * len_block
+
+        while ipn >= str_[start:start + 3]:
+
+            min_ += 1
+            start = min_ * len_block
+
+            if min_ >= max_:
+                break
+
+        len_id = self._id_len
+        start = min_ * len_block - len_id
+
+        return int(hexlify(str_[start:start + len_id]), 16)
 
     def _get_pos(self, ip):
+
         ip1oct = int(ip.split('.', 1)[0])
 
-        if ip1oct == 0 or ip1oct == 10 or ip1oct == 127 or ip1oct >= self._b_idx_len:
+        if ip1oct in {0, 10, 127} or ip1oct >= self._b_idx_len:
             return False
 
         try:
             ipn = inet_aton(ip)
+
         except Exception:
             return False
 
         if self._batch_mode:
             blocks = {'min': self._b_idx_set[ip1oct - 1], 'max': self._b_idx_set[ip1oct]}
+
         else:
             start = (ip1oct - 1) * 4
             blocks = dict(zip(('min', 'max'), unpack('>LL', self._b_idx_str[start:start + 8])))
 
-        if blocks['max'] - blocks['min'] > self._range:
+        range_ = self._range
+
+        if blocks['max'] - blocks['min'] > range_:
 
             part = self._search_idx(
-                ipn, int(floor(blocks['min'] / self._range)), int(floor(blocks['max'] / self._range) - 1))
+                ipn, int(floor(blocks['min'] / range_)), int(floor(blocks['max'] / range_) - 1))
 
-            if part > 0:
-                min_ = part * self._range
-            else:
-                min_ = 0
-
-            if part > self._m_idx_len:
-                max_ = self._db_items
-            else:
-                max_ = (part + 1) * self._range
+            min_ = part * range_ if part > 0 else 0
+            max_ = self._db_items if part > self._m_idx_len else (part + 1) * range_
 
             if min_ < blocks['min']:
                 min_ = blocks['min']
 
             if max_ > blocks['max']:
                 max_ = blocks['max']
+
         else:
             min_ = blocks['min']
             max_ = blocks['max']
@@ -252,6 +274,7 @@ class GeoLocator(object):
         return self._search_db(self._fh.read(length * self._block_len), ipn, 0, length - 1)
 
     def _read_data_chunk(self, data_type, start_pos, max_read):
+
         raw = ''
 
         if start_pos and max_read:
@@ -281,6 +304,7 @@ class GeoLocator(object):
             return False
 
         country_only = False
+
         if start_pos < self._country_size:
             # TODO Appears to be a dead clause.
             country = self._read_data_chunk(self._TYPE_COUNTRY, start_pos, self._max_country)
@@ -297,6 +321,7 @@ class GeoLocator(object):
             }
 
         region = None
+
         if detailed:
             region = self._read_data_chunk(self._TYPE_REGION, city['region_seek'], self._max_region)
 
@@ -337,6 +362,7 @@ class GeoLocator(object):
         return doc
 
     def _parse_pack(self, pack, item=''):
+
         result = {}
         start_pos = 0
         empty = not item
@@ -367,6 +393,7 @@ class GeoLocator(object):
         }
 
         for chunk in pack.split(b'/'):
+
             chunk_type, chunk_name = chunk.split(b':')
             chunk_name = chunk_name.decode('utf-8')
             type_letter = chr_(chunk_type[0])
@@ -378,8 +405,10 @@ class GeoLocator(object):
                 continue
 
             length = map_len.get(type_letter, 4)
+
             try:
                 length = length()
+
             except TypeError:
                 pass
 
@@ -390,6 +419,7 @@ class GeoLocator(object):
             if val_real is None:  # case `b`
                 val_real = val
                 length += 1
+
             else:
                 val_real = val_real()
 
@@ -397,13 +427,17 @@ class GeoLocator(object):
 
             try:
                 val_real = val_real.decode('utf-8')
+
             except AttributeError:
                 pass
 
             result[chunk_name] = val_real
+
             if not isinstance(val_real, string_type):
+
                 try:
                     result[chunk_name] = val_real[0]
+
                 except TypeError:
                     pass
 
