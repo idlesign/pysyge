@@ -4,6 +4,7 @@ from binascii import hexlify
 from datetime import datetime
 from math import floor
 from socket import inet_aton
+
 from struct import unpack
 
 try:
@@ -435,7 +436,7 @@ class GeoLocator(object):
         Amount of information about IP contained in the dictionary depends
         upon `detailed` flag state.
         """
-        if isinstance(ip, str):
+        if isinstance(ip, string_type):
             ip = [ip]
             
         seek = map(self._get_pos, ip)
