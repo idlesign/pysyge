@@ -2,8 +2,8 @@ pysyge changelog
 ================
 
 
-Unreleased
-----------
+v1.0.1 [2019-11-27]
+-------------------
 ! Dropped QA for Python 2.
 * Fixed parsing exception on Py 3 (see #10).
 
