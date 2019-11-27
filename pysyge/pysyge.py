@@ -4,6 +4,7 @@ from binascii import hexlify
 from datetime import datetime
 from math import floor
 from socket import inet_aton
+
 from struct import unpack
 
 try:
@@ -15,6 +16,14 @@ except NameError:
 MODE_FILE = 0
 MODE_MEMORY = 1
 MODE_BATCH = 2
+
+
+def bytes_to_hex_(val):  # type: (bytes) -> str
+    """Converts bytes to hex string
+    :param val: bytes string to convert
+    :return: Hex string
+    """
+    return val.hex() if hasattr(val, 'hex') else val.encode('hex')
 
 
 def chr_(val):  # py3 compatibility
@@ -186,7 +195,8 @@ class GeoLocator(object):
         else:
 
             start = min_ * self._block_len + 3
-            return int(str_[start:start + 3].encode('hex'), 16)
+            hex_str = bytes_to_hex_(str_[start:start + 3])
+            return int(hex_str, 16)
 
         start = min_ * self._block_len - self._id_len
         return int(hexlify(str_[start:start + self._id_len]), 16)
@@ -426,7 +436,7 @@ class GeoLocator(object):
         Amount of information about IP contained in the dictionary depends
         upon `detailed` flag state.
         """
-        if isinstance(ip, str):
+        if isinstance(ip, string_type):
             ip = [ip]
             
         seek = map(self._get_pos, ip)
