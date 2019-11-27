@@ -8,13 +8,19 @@ http://github.com/idlesign/pysyge
 
 ----
 
-|release| |lic|
+|release| |lic| |ci| |coverage|
 
 .. |release| image:: https://img.shields.io/pypi/v/pysyge.svg
     :target: https://pypi.python.org/pypi/pysyge
 
 .. |lic| image:: https://img.shields.io/pypi/l/pysyge.svg
     :target: https://pypi.python.org/pypi/pysyge
+
+.. |ci| image:: https://img.shields.io/travis/idlesign/pysyge/master.svg
+    :target: https://travis-ci.org/idlesign/pysyge
+
+.. |coverage| image:: https://img.shields.io/coveralls/idlesign/pysyge/master.svg
+    :target: https://coveralls.io/r/idlesign/pysyge
 
 
 
