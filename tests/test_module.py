@@ -14,13 +14,8 @@ BASE_IP = '77.88.55.80'  # Yandex
 
 
 def test_quirks():
-    loc = pysyge.GeoLocator(DATABASE_CITY_FILE, pysyge.MODE_MEMORY)
-
-    # Invalid IPs.
-    assert not loc.get_location('127.0.0.1')
-    assert not loc.get_location('80.8qeqw')
-
-    result = loc.get_location('49.206.213.75', detailed=True)
+    geodata = pysyge.GeoLocator(DATABASE_CITY_FILE, pysyge.MODE_MEMORY)
+    result = geodata.get_location('49.206.213.75', detailed=True)
     assert result['city'] == ''
     assert result['country_iso'] == 'US'
     assert result['tz'] == ''
@@ -47,9 +42,10 @@ class TestGeoLocatorBasicCheck(object):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE)
         assert isinstance(geodata.get_db_date(), datetime.datetime)
 
-    def test_localhost(self):
+    def test_invalid_ips(self):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE)
-        assert geodata.get_location('127.0.0.1') is False
+        assert geodata.get_location('127.0.0.1') == {}
+        assert geodata.get_location('80.8qeqw') == {}
 
 
 def assert_location(location, detailed=False):
@@ -92,8 +88,9 @@ class TestGeoLocatorFileModeCheck(object):
         location = geodata.get_location(BASE_IP, detailed=True)
         assert_location(location, detailed=True)
 
-        locations = geodata.get_locations(BASE_IP)
+        locations = geodata.get_locations([BASE_IP, '100.20.30.40'])
         assert locations[0]['country_iso'] == 'RU'
+        assert locations[1]['country_iso'] == 'US'
 
 
 class TestGeoLocatorMemoryModeCheck(object):

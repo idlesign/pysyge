@@ -1,10 +1,9 @@
-from __future__ import division
+from __future__ import division, unicode_literals
 
 from binascii import hexlify
 from datetime import datetime
 from math import floor
 from socket import inet_aton
-
 from struct import unpack
 
 try:
@@ -62,10 +61,12 @@ class GeoLocator(object):
         """Creates an interface to access Sypex Geo IP database data.
 
         :param db_file: A path to Sypex Geo IP database file.
+
         :param mode: Can be any of the following, or a combination:
             MODE_FILE - Seek data in database file on every IP request. Default.
             MODE_MEMORY - Read entire db into memory, an seek data there.
             MODE_BATCH - Create additional indexes to speed up batch IP requests.
+
         :raises: IOError, GeoLocatorException
 
         """
@@ -131,7 +132,14 @@ class GeoLocator(object):
         self._info['cities_begin'] = self._info['regions_begin'] + prolog['region_size']
 
     def _search_idx(self, ipn, min_, max_):
+        """
+        :param bytes ipn:
+        :param int min_:
+        :param int max_:
 
+        :rtype: int
+
+        """
         if self._batch_mode:
             m_idx = self._m_idx_set
 
@@ -179,7 +187,15 @@ class GeoLocator(object):
         return min_
 
     def _search_db(self, str_, ipn, min_, max_):
+        """
+        :param bytes str_:
+        :param bytes ipn:
+        :param int min_:
+        :param int max_:
 
+        :rtype: int
+
+        """
         len_block = self._block_len
 
         if (max_ - min_) > 1:
@@ -214,17 +230,22 @@ class GeoLocator(object):
         return int(hexlify(str_[start:start + len_id]), 16)
 
     def _get_pos(self, ip):
+        """
+        :param str ip:
 
+        :rtype: int
+
+        """
         ip1oct = int(ip.split('.', 1)[0])
 
         if ip1oct in {0, 10, 127} or ip1oct >= self._b_idx_len:
-            return False
+            return 0
 
         try:
             ipn = inet_aton(ip)
 
         except OSError:
-            return False
+            return 0
 
         if self._batch_mode:
             blocks = {
@@ -269,8 +290,15 @@ class GeoLocator(object):
         return self._search_db(self._fh.read(length * self._block_len), ipn, 0, length - 1)
 
     def _read_data_chunk(self, data_type, start_pos, max_read):
+        """
+        :param int data_type:
+        :param int start_pos:
+        :param int max_read:
 
-        raw = ''
+        :rtype: dict
+
+        """
+        raw = b''
 
         if start_pos and max_read:
 
@@ -294,9 +322,15 @@ class GeoLocator(object):
         return self._parse_pack(self._pack[data_type], raw)
 
     def _parse_location(self, start_pos, detailed=False):
+        """
+        :param int start_pos:
+        :param bool detailed:
 
+        :rtype: dict
+
+        """
         if not self._pack:
-            return False
+            return {}
 
         country_only = False
 
@@ -326,7 +360,15 @@ class GeoLocator(object):
 
     @staticmethod
     def _structure_location_data(city, country, region):
+        """
 
+        :param city:
+        :param country:
+        :param region:
+
+        :rtype: dict
+
+        """
         del city['country_id']
         del city['region_seek']
 
@@ -358,7 +400,13 @@ class GeoLocator(object):
 
     @staticmethod
     def _parse_pack(pack, item=b''):
+        """
+        :param bytes pack:
+        :param bytes item:
 
+        :rtype: dict
+
+        """
         result = {}
         start_pos = 0
         empty = not item
@@ -445,8 +493,12 @@ class GeoLocator(object):
     def get_location(self, ip, detailed=False):
         """Returns a dictionary with location data or False on failure.
 
-        Amount of information about IP contained in the dictionary depends
-        upon `detailed` flag state.
+        :param str ip:
+
+        :param bool detailed: Amount of information about IP contained
+            in the dictionary depends upon `detailed` flag state.
+
+        :rtype: dict
 
         """
         seek = self._get_pos(ip)
@@ -454,18 +506,23 @@ class GeoLocator(object):
         if seek > 0:
             return self._parse_location(seek, detailed=detailed)
 
-        return False
+        return {}
 
     def get_locations(self, ip, detailed=False):
-        """Returns a list of dictionaries with location data or False 
-        on failure. Argument `ip` must be an iterable object.
-        
-        Amount of information about IP contained in the dictionary depends
-        upon `detailed` flag state.
+        """Returns a list of dictionaries with location data.
+
+        :param list[str]|str ip: Argument `ip` must be an iterable object.
+
+        :param bool detailed: Amount of information about IP contained
+            in the dictionary depends upon `detailed` flag state.
+
+        :rtype: list[dict]
+
         """
         if isinstance(ip, string_type):
             ip = [ip]
             
-        seek = map(self._get_pos, ip)
-
-        return [self._parse_location(elem, detailed=detailed) if elem > 0 else False for elem in seek]
+        return [
+            self._parse_location(pos, detailed=detailed) if pos > 0 else {}
+            for pos in map(self._get_pos, ip)
+        ]
