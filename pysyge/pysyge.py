@@ -19,14 +19,6 @@ MODE_MEMORY = 1
 MODE_BATCH = 2
 
 
-def bytes_to_hex_(val):  # type: (bytes) -> str
-    """Converts bytes to hex string
-    :param val: bytes string to convert
-    :return: Hex string
-    """
-    return val.hex() if hasattr(val, 'hex') else val.encode('hex')
-
-
 def chr_(val):  # py3 compatibility
     try:
         return chr(val)
@@ -190,34 +182,31 @@ class GeoLocator(object):
 
         len_block = self._block_len
 
-        if (max_ - min_) <= 0:
+        if (max_ - min_) > 1:
 
-            start = min_ * len_block + 3
-            hex_str = bytes_to_hex_(str_[start:start + 3])
-            return int(hex_str, 16)
+            ipn = ipn[1:]
 
-        ipn = ipn[1:]
+            while (max_ - min_) > 8:
+                offset = (min_ + max_) >> 1
+                start = offset * len_block
 
-        while (max_ - min_) > 8:
+                if ipn > str_[start:start + 3]:
+                    min_ = offset
 
-            offset = (min_ + max_) >> 1
-            start = offset * len_block
+                else:
+                    max_ = offset
 
-            if ipn > str_[start:start + 3]:
-                min_ = offset
-
-            else:
-                max_ = offset
-
-        start = min_ * len_block
-
-        while ipn >= str_[start:start + 3]:
-
-            min_ += 1
             start = min_ * len_block
 
-            if min_ >= max_:
-                break
+            while ipn >= str_[start:start + 3]:
+                min_ += 1
+                start = min_ * len_block
+
+                if min_ >= max_:
+                    break
+
+        else:
+            min_ += 1
 
         len_id = self._id_len
         start = min_ * len_block - len_id
@@ -234,11 +223,14 @@ class GeoLocator(object):
         try:
             ipn = inet_aton(ip)
 
-        except Exception:
+        except OSError:
             return False
 
         if self._batch_mode:
-            blocks = {'min': self._b_idx_set[ip1oct - 1], 'max': self._b_idx_set[ip1oct]}
+            blocks = {
+                'min': self._b_idx_set[ip1oct-1],
+                'max': self._b_idx_set[ip1oct]
+            }
 
         else:
             start = (ip1oct - 1) * 4
@@ -249,7 +241,10 @@ class GeoLocator(object):
         if blocks['max'] - blocks['min'] > range_:
 
             part = self._search_idx(
-                ipn, int(floor(blocks['min'] / range_)), int(floor(blocks['max'] / range_) - 1))
+                ipn,
+                int(floor(blocks['min'] / range_)),
+                int(floor(blocks['max'] / range_) - 1)
+            )
 
             min_ = part * range_ if part > 0 else 0
             max_ = self._db_items if part > self._m_idx_len else (part + 1) * range_
@@ -306,7 +301,6 @@ class GeoLocator(object):
         country_only = False
 
         if start_pos < self._country_size:
-            # TODO Appears to be a dead clause.
             country = self._read_data_chunk(self._TYPE_COUNTRY, start_pos, self._max_country)
             city = self._parse_pack(self._pack[2])
             country_only = True
@@ -330,7 +324,8 @@ class GeoLocator(object):
 
         return self._structure_location_data(city, country, region)
 
-    def _structure_location_data(self, city, country, region):
+    @staticmethod
+    def _structure_location_data(city, country, region):
 
         del city['country_id']
         del city['region_seek']
@@ -361,13 +356,13 @@ class GeoLocator(object):
 
         return doc
 
-    def _parse_pack(self, pack, item=''):
+    @staticmethod
+    def _parse_pack(pack, item=b''):
 
         result = {}
         start_pos = 0
         empty = not item
 
-        # TODO Some of those seems to be unused.
         map_len = {
             't': 1, 'T': 1,
             's': 2, 'S': 2, 'n': 2,
@@ -389,7 +384,7 @@ class GeoLocator(object):
             'd': lambda: unpack('d', val),
             'n': lambda: unpack('h', val)[0] / pow(10, int(chr_(chunk_type[1]))),
             'N': lambda: unpack('i', val)[0] / pow(10, int(chr_(chunk_type[1]))),
-            'c': lambda: val.decode('utf-8').rstrip(' '),
+            'c': lambda: val.rstrip(b' '),
         }
 
         for chunk in pack.split(b'/'):
@@ -399,21 +394,17 @@ class GeoLocator(object):
             type_letter = chr_(chunk_type[0])
 
             if empty:
-
-                val = '' if type_letter == 'c' else 0
-                result[chunk_name] = type_letter == 'b' or val
+                result[chunk_name] = '' if type_letter in {'b', 'c'} else 0
                 continue
 
             length = map_len.get(type_letter, 4)
+            chars = type_letter in {'c', 'b'}
 
-            try:
+            if chars:
                 length = length()
 
-            except TypeError:
-                pass
-
             end_pos = start_pos+length
-            val = item[start_pos:end_pos]
+            val = item[start_pos:end_pos]  # type: bytes
             val_real = map_val.get(type_letter)
 
             if val_real is None:  # case `b`
@@ -425,28 +416,30 @@ class GeoLocator(object):
 
             start_pos += length
 
-            try:
+            if chars:
                 val_real = val_real.decode('utf-8')
-
-            except AttributeError:
-                pass
 
             result[chunk_name] = val_real
 
-            if not isinstance(val_real, string_type):
-
-                try:
-                    result[chunk_name] = val_real[0]
-
-                except TypeError:
-                    pass
+            if isinstance(val_real, tuple):
+                result[chunk_name] = val_real[0]
 
         return result
 
     def get_db_version(self):
+        """Returns database version number.
+
+        :rtype: int
+
+        """
         return self._db_ver
 
     def get_db_date(self):
+        """Returns database creation datetime.
+
+        :rtype: datetime
+
+        """
         return datetime.fromtimestamp(self._db_ts)
 
     def get_location(self, ip, detailed=False):

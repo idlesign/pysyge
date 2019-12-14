@@ -2,13 +2,11 @@
 from __future__ import unicode_literals
 
 import datetime
-
-import pytest
 from os import path
 
-from pysyge import pysyge
-from pysyge.pysyge import bytes_to_hex_
+import pytest
 
+from pysyge import pysyge
 
 DIR_CURRENT = path.dirname(__file__)
 DATABASE_CITY_FILE = path.join(DIR_CURRENT, 'SxGeoCity.dat')  # 2019-11-19
@@ -17,7 +15,13 @@ BASE_IP = '77.88.55.80'  # Yandex
 
 def test_quirks():
     loc = pysyge.GeoLocator(DATABASE_CITY_FILE, pysyge.MODE_MEMORY)
+
+    # Invalid IPs.
+    assert not loc.get_location('127.0.0.1')
+    assert not loc.get_location('80.8qeqw')
+
     result = loc.get_location('49.206.213.75', detailed=True)
+    assert result['city'] == ''
     assert result['country_iso'] == 'US'
     assert result['tz'] == ''
     assert result['info']['country']['name_en'] == 'United States'
@@ -116,8 +120,3 @@ class TestGeoLocatorBatchModeCheck(object):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE, pysyge.MODE_BATCH)
         location = geodata.get_location(BASE_IP, detailed=True)
         assert_location(location, detailed=True)
-
-
-class TestHexConversion(object):
-    def test_hex_conversion(self):
-        assert 'f0f1f2' == bytes_to_hex_(b'\xf0\xf1\xf2')
