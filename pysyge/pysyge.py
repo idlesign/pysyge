@@ -244,7 +244,7 @@ class GeoLocator(object):
         try:
             ipn = inet_aton(ip)
 
-        except OSError:
+        except Exception:  # py3: OSError, py2: socket.error
             return 0
 
         if self._batch_mode:
