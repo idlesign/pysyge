@@ -2,8 +2,8 @@ pysyge changelog
 ================
 
 
-Unreleased
-----------
+v1.1.0 [2019-12-14]
+-------------------
 + .get_location() now consistenly returns a dictionary.
 * Fixed 'True' for empty string values (see #12).
 * Minor code optimization.
