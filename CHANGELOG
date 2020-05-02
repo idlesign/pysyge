@@ -2,6 +2,12 @@ pysyge changelog
 ================
 
 
+Unreleased
+----------
+* Added QA for Py 3.8.
+* Dropped QA for Py 3.5.
+
+
 v1.1.0 [2019-12-14]
 -------------------
 + .get_location() now consistenly returns a dictionary.
