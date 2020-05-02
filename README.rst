@@ -40,7 +40,7 @@ Direct DB link that might became broken over time:
 Requirements
 ------------
 
-* Python 2.7+, 3.6+
+* Python 3.6+
 
 
 

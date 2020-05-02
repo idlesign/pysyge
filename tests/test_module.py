@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import datetime
 from os import path
 
@@ -16,13 +13,13 @@ BASE_IP = '77.88.55.80'  # Yandex
 def test_quirks():
     geodata = pysyge.GeoLocator(DATABASE_CITY_FILE, pysyge.MODE_MEMORY)
     result = geodata.get_location('49.206.213.75', detailed=True)
-    assert result['city'] == ''
-    assert result['country_iso'] == 'US'
+    assert result['city'] == 'Хайдарабад'
+    assert result['country_iso'] == 'IN'
     assert result['tz'] == ''
-    assert result['info']['country']['name_en'] == 'United States'
+    assert result['info']['country']['name_en'] == 'India'
 
 
-class TestGeoLocatorBasicCheck(object):
+class TestGeoLocatorBasicCheck:
 
     def test_file_not_found(self):
 
@@ -76,7 +73,7 @@ def assert_location(location, detailed=False):
         assert location['region_id'] == 0
 
 
-class TestGeoLocatorFileModeCheck(object):
+class TestGeoLocatorFileModeCheck:
 
     def test_location_basic(self):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE)
@@ -93,27 +90,15 @@ class TestGeoLocatorFileModeCheck(object):
         assert locations[1]['country_iso'] == 'US'
 
 
-class TestGeoLocatorMemoryModeCheck(object):
-
-    def test_location_basic(self):
-        geodata = pysyge.GeoLocator(DATABASE_CITY_FILE, pysyge.MODE_MEMORY)
-        location = geodata.get_location(BASE_IP)
-        assert_location(location)
-
-    def test_location_detailed(self):
-        geodata = pysyge.GeoLocator(DATABASE_CITY_FILE, pysyge.MODE_MEMORY)
-        location = geodata.get_location(BASE_IP, detailed=True)
-        assert_location(location, detailed=True)
+@pytest.mark.parametrize('mode', [pysyge.MODE_MEMORY, pysyge.MODE_BATCH])
+def test_location_basic(mode):
+    geodata = pysyge.GeoLocator(DATABASE_CITY_FILE, mode)
+    location = geodata.get_location(BASE_IP)
+    assert_location(location)
 
 
-class TestGeoLocatorBatchModeCheck(object):
-
-    def test_location_basic(self):
-        geodata = pysyge.GeoLocator(DATABASE_CITY_FILE, pysyge.MODE_BATCH)
-        location = geodata.get_location(BASE_IP)
-        assert_location(location)
-
-    def test_location_detailed(self):
-        geodata = pysyge.GeoLocator(DATABASE_CITY_FILE, pysyge.MODE_BATCH)
-        location = geodata.get_location(BASE_IP, detailed=True)
-        assert_location(location, detailed=True)
+@pytest.mark.parametrize('mode', [pysyge.MODE_MEMORY, pysyge.MODE_BATCH])
+def test_location_detailed(mode):
+    geodata = pysyge.GeoLocator(DATABASE_CITY_FILE, mode)
+    location = geodata.get_location(BASE_IP, detailed=True)
+    assert_location(location, detailed=True)

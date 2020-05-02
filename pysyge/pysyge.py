@@ -1,28 +1,24 @@
-from __future__ import division, unicode_literals
-
 from binascii import hexlify
 from datetime import datetime
 from math import floor
 from socket import inet_aton
 from struct import unpack
+from typing import Union, List, Dict, Any
 
-try:
-    string_type = basestring
-
-except NameError:
-    string_type = str
-
+TypeGeoDict = Dict[str, Any]
 
 MODE_FILE = 0
 MODE_MEMORY = 1
 MODE_BATCH = 2
 
 
-def chr_(val):  # py3 compatibility
+def chr_(val: Union[int, bytes]):
     try:
         return chr(val)
+
     except TypeError:
         pass
+
     return val
 
 
@@ -30,7 +26,7 @@ class GeoLocatorException(Exception):
     """Basic pysyge GeoLocator exception."""
 
 
-class GeoLocator(object):
+class GeoLocator:
 
     _cc2iso = (
         '', 'AP', 'EU', 'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'CW', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU',
@@ -57,7 +53,7 @@ class GeoLocator(object):
     _TYPE_REGION = 1
     _TYPE_CITY = 2
 
-    def __init__(self, db_file, mode=MODE_FILE):
+    def __init__(self, db_file: str, mode: int = MODE_FILE):
         """Creates an interface to access Sypex Geo IP database data.
 
         :param db_file: A path to Sypex Geo IP database file.
@@ -131,15 +127,8 @@ class GeoLocator(object):
         self._info = {'regions_begin': self._db_begin + self._db_items * self._block_len}
         self._info['cities_begin'] = self._info['regions_begin'] + prolog['region_size']
 
-    def _search_idx(self, ipn, min_, max_):
-        """
-        :param bytes ipn:
-        :param int min_:
-        :param int max_:
+    def _search_idx(self, ipn: bytes, min_: int, max_: int) -> int:
 
-        :rtype: int
-
-        """
         if self._batch_mode:
             m_idx = self._m_idx_set
 
@@ -186,16 +175,8 @@ class GeoLocator(object):
 
         return min_
 
-    def _search_db(self, str_, ipn, min_, max_):
-        """
-        :param bytes str_:
-        :param bytes ipn:
-        :param int min_:
-        :param int max_:
+    def _search_db(self, str_: bytes, ipn: bytes, min_: int, max_: int) -> int:
 
-        :rtype: int
-
-        """
         len_block = self._block_len
 
         if (max_ - min_) > 1:
@@ -229,13 +210,8 @@ class GeoLocator(object):
 
         return int(hexlify(str_[start:start + len_id]), 16)
 
-    def _get_pos(self, ip):
-        """
-        :param str ip:
+    def _get_pos(self, ip: str) -> int:
 
-        :rtype: int
-
-        """
         ip1oct = int(ip.split('.', 1)[0])
 
         if ip1oct in {0, 10, 127} or ip1oct >= self._b_idx_len:
@@ -244,7 +220,7 @@ class GeoLocator(object):
         try:
             ipn = inet_aton(ip)
 
-        except Exception:  # py3: OSError, py2: socket.error
+        except OSError:
             return 0
 
         if self._batch_mode:
@@ -289,15 +265,8 @@ class GeoLocator(object):
 
         return self._search_db(self._fh.read(length * self._block_len), ipn, 0, length - 1)
 
-    def _read_data_chunk(self, data_type, start_pos, max_read):
-        """
-        :param int data_type:
-        :param int start_pos:
-        :param int max_read:
+    def _read_data_chunk(self, data_type: int, start_pos: int, max_read: int) -> TypeGeoDict:
 
-        :rtype: dict
-
-        """
         raw = b''
 
         if start_pos and max_read:
@@ -321,14 +290,8 @@ class GeoLocator(object):
 
         return self._parse_pack(self._pack[data_type], raw)
 
-    def _parse_location(self, start_pos, detailed=False):
-        """
-        :param int start_pos:
-        :param bool detailed:
+    def _parse_location(self, start_pos: int, detailed: bool = False) -> TypeGeoDict:
 
-        :rtype: dict
-
-        """
         if not self._pack:
             return {}
 
@@ -359,16 +322,8 @@ class GeoLocator(object):
         return self._structure_location_data(city, country, region)
 
     @staticmethod
-    def _structure_location_data(city, country, region):
-        """
+    def _structure_location_data(city: TypeGeoDict, country: TypeGeoDict, region) -> TypeGeoDict:
 
-        :param city:
-        :param country:
-        :param region:
-
-        :rtype: dict
-
-        """
         del city['country_id']
         del city['region_seek']
 
@@ -399,14 +354,8 @@ class GeoLocator(object):
         return doc
 
     @staticmethod
-    def _parse_pack(pack, item=b''):
-        """
-        :param bytes pack:
-        :param bytes item:
+    def _parse_pack(pack: bytes, item: bytes = b'') -> TypeGeoDict:
 
-        :rtype: dict
-
-        """
         result = {}
         start_pos = 0
         empty = not item
@@ -438,7 +387,7 @@ class GeoLocator(object):
         for chunk in pack.split(b'/'):
 
             chunk_type, chunk_name = chunk.split(b':')
-            chunk_name = chunk_name.decode('utf-8')
+            chunk_name = chunk_name.decode()
             type_letter = chr_(chunk_type[0])
 
             if empty:
@@ -452,7 +401,7 @@ class GeoLocator(object):
                 length = length()
 
             end_pos = start_pos+length
-            val = item[start_pos:end_pos]  # type: bytes
+            val: bytes = item[start_pos:end_pos]
             val_real = map_val.get(type_letter)
 
             if val_real is None:  # case `b`
@@ -465,7 +414,7 @@ class GeoLocator(object):
             start_pos += length
 
             if chars:
-                val_real = val_real.decode('utf-8')
+                val_real = val_real.decode()
 
             result[chunk_name] = val_real
 
@@ -474,31 +423,21 @@ class GeoLocator(object):
 
         return result
 
-    def get_db_version(self):
-        """Returns database version number.
-
-        :rtype: int
-
-        """
+    def get_db_version(self) -> int:
+        """Returns database version number."""
         return self._db_ver
 
-    def get_db_date(self):
-        """Returns database creation datetime.
-
-        :rtype: datetime
-
-        """
+    def get_db_date(self) -> datetime:
+        """Returns database creation datetime."""
         return datetime.fromtimestamp(self._db_ts)
 
-    def get_location(self, ip, detailed=False):
+    def get_location(self, ip: str, detailed: bool = False) -> TypeGeoDict:
         """Returns a dictionary with location data or False on failure.
 
-        :param str ip:
+        :param ip:
 
-        :param bool detailed: Amount of information about IP contained
+        :param detailed: Amount of information about IP contained
             in the dictionary depends upon `detailed` flag state.
-
-        :rtype: dict
 
         """
         seek = self._get_pos(ip)
@@ -508,18 +447,16 @@ class GeoLocator(object):
 
         return {}
 
-    def get_locations(self, ip, detailed=False):
+    def get_locations(self, ip: Union[List[str], str], detailed: bool = False) -> List[TypeGeoDict]:
         """Returns a list of dictionaries with location data.
 
-        :param list[str]|str ip: Argument `ip` must be an iterable object.
+        :param ip: Argument `ip` must be an iterable object.
 
-        :param bool detailed: Amount of information about IP contained
+        :param detailed: Amount of information about IP contained
             in the dictionary depends upon `detailed` flag state.
 
-        :rtype: list[dict]
-
         """
-        if isinstance(ip, string_type):
+        if isinstance(ip, str):
             ip = [ip]
             
         return [
