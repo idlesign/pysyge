@@ -6,7 +6,7 @@ import pytest
 from pysyge import pysyge
 
 DIR_CURRENT = path.dirname(__file__)
-DATABASE_CITY_FILE = path.join(DIR_CURRENT, 'SxGeoCity.dat')  # 2019-11-19
+DATABASE_CITY_FILE = path.join(DIR_CURRENT, 'SxGeoCity.dat')  # 2020.08.17
 BASE_IP = '77.88.55.80'  # Yandex
 
 
@@ -20,6 +20,9 @@ def test_quirks():
 
     result = geodata.get_location('1.0.74.0')
     assert result['city'] == 'Хацукаити'
+
+    result = geodata.get_location('24.231.175.176')
+    assert result['city'] == 'Spruce'
 
 
 class TestGeoLocatorBasicCheck:
