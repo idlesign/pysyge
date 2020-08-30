@@ -18,6 +18,9 @@ def test_quirks():
     assert result['tz'] == ''
     assert result['info']['country']['name_en'] == 'India'
 
+    result = geodata.get_location('1.0.74.0')
+    assert result['city'] == 'Хацукаити'
+
 
 class TestGeoLocatorBasicCheck:
 
