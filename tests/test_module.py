@@ -24,6 +24,9 @@ def test_quirks():
     result = geodata.get_location('24.231.175.176')
     assert result['city'] == 'Spruce'
 
+    result = geodata.get_location('109.207.230.244')
+    assert result['city'] == 'Калининград'
+
 
 class TestGeoLocatorBasicCheck:
 
