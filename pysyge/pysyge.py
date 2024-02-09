@@ -146,7 +146,7 @@ class GeoLocator:
 
                 min_ += 1
 
-                if min_ >= max_:
+                if min_ > max_:
                     break
 
         else:

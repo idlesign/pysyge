@@ -27,6 +27,10 @@ def test_quirks():
     result = geodata.get_location('109.207.230.244')
     assert result['city'] == 'Калининград'
 
+    geodata = pysyge.GeoLocator(DATABASE_CITY_FILE, pysyge.MODE_BATCH)
+    result = geodata.get_location('109.252.119.71', detailed=True)
+    assert result['info']['city']['name_en'] == 'Moscow'
+
 
 class TestGeoLocatorBasicCheck:
 
