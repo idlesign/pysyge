@@ -1,55 +1,36 @@
-pysyge changelog
-================
+# pysyge changelog
 
+### v1.2.1 [2024-03-08]
+* ** Drop QA for Py 3.6, Add for 3.11.
+* ** Fix MODE_BATCH (see #16).
 
-v1.2.1 [2024-03-08]
--------------------
-* Drop QA for Py 3.6, Add for 3.11.
-* Fix MODE_BATCH (see #16).
+### v1.2.0 [2020-05-02]
+* !! Dropped Py 2 support.
+* ** Added QA for Py 3.8.
+* ** Dropped QA for Py 3.5.
 
+### v1.1.0 [2019-12-14]
+* ++ .get_location() now consistenly returns a dictionary.
+* ** Fixed 'True' for empty string values (see #12).
+* ** Minor code optimization.
 
-v1.2.0 [2020-05-02]
--------------------
-! Dropped Py 2 support.
-* Added QA for Py 3.8.
-* Dropped QA for Py 3.5.
+### v1.0.1 [2019-11-27]
+* !! Dropped QA for Python 2.
+* ** Fixed parsing exception on Py 3 (see #10).
 
+### v1.0.0
+* !! Dropped QA for Python 3.3 and 3.4.
+* ** No functional changes. Celebrating 1.0.0.
 
-v1.1.0 [2019-12-14]
--------------------
-+ .get_location() now consistenly returns a dictionary.
-* Fixed 'True' for empty string values (see #12).
-* Minor code optimization.
+### v0.3.0
+* ++ Added GeoLocator.get_locations() method.
+* ++ GeoLocator can be imported from package root.
 
+### v0.2.0
+* ++ Added Python 3 support.
+* ++ Restructured to work with Sypex Geo 2.2+ Databases (closes #3)
 
-v1.0.1 [2019-11-27]
--------------------
-! Dropped QA for Python 2.
-* Fixed parsing exception on Py 3 (see #10).
+* ** Fixed region and tz index exceptions (see #1).
 
-
-v1.0.0
-------
-! Dropped QA for Python 3.3 and 3.4.
-* No functional changes. Celebrating 1.0.0.
-
-
-v0.3.0
-------
-+ Added GeoLocator.get_locations() method.
-+ GeoLocator can be imported from package root.
-
-
-v0.2.0
-------
-+ Added Python 3 support.
-+ Restructured to work with Sypex Geo 2.2+ Databases (closes #3)
-
-
-------
-* Fixed region and tz index exceptions (see #1).
-
-
-v0.1.0
-------
-+ Basic functionality.
+### v0.1.0
+* ++ Basic functionality.

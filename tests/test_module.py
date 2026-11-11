@@ -1,12 +1,12 @@
 import datetime
-from os import path
+from pathlib import Path
 
 import pytest
 
 from pysyge import pysyge
 
-DIR_CURRENT = path.dirname(__file__)
-DATABASE_CITY_FILE = path.join(DIR_CURRENT, 'SxGeoCity.dat')  # 2020.08.17
+DIR_CURRENT = Path(__file__).parent
+DATABASE_CITY_FILE = DIR_CURRENT / 'SxGeoCity.dat'  # 2020.08.17
 BASE_IP = '77.88.55.80'  # Yandex
 
 
@@ -36,13 +36,13 @@ class TestGeoLocatorBasicCheck:
 
     def test_file_not_found(self):
 
-        with pytest.raises(IOError):
+        with pytest.raises(FileNotFoundError):
             pysyge.GeoLocator('nosuchfile.dat')
 
     def test_wrong_file(self):
 
         with pytest.raises(pysyge.GeoLocatorException):
-            pysyge.GeoLocator(path.join(DIR_CURRENT, 'test_module.py'))
+            pysyge.GeoLocator(DIR_CURRENT / 'test_module.py')
 
     def test_db_version(self):
         geodata = pysyge.GeoLocator(DATABASE_CITY_FILE)

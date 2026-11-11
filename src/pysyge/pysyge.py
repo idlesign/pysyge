@@ -1,6 +1,7 @@
 from binascii import hexlify
 from datetime import datetime
 from math import floor
+from pathlib import Path
 from socket import inet_aton
 from struct import unpack
 from typing import Union, List, Dict, Any
@@ -66,23 +67,23 @@ class GeoLocator:
         :raises: IOError, GeoLocatorException
 
         """
-        self._fh = open(db_file, 'rb')
+        self._fh = Path(db_file).open('rb')
 
         header = self._fh.read(40)
 
         if header[:3] != b'SxG':
-            raise GeoLocatorException('Unable open file %s' % db_file)
+            raise GeoLocatorException(f'Unable open file {db_file}')
 
         prolog = dict(zip(
             ('ver', 'ts', 'type', 'charset', 'b_idx_len',
              'm_idx_len', 'range', 'db_items', 'id_len', 'max_region',
              'max_city', 'region_size', 'city_size', 'max_country',
              'country_size', 'pack_size'),
-            unpack('>BLBBBHHLBHHLLHLH', header[3:])))
+            unpack('>BLBBBHHLBHHLLHLH', header[3:]), strict=False))
 
         if prolog['b_idx_len'] * prolog['m_idx_len'] * prolog['range'] * prolog['db_items'] * \
                 prolog['ts'] * prolog['id_len'] == 0:
-            raise GeoLocatorException('Wrong file format %s' % db_file)
+            raise GeoLocatorException(f'Wrong file format {db_file}')
 
         self._b_idx_len = prolog['b_idx_len']
         self._m_idx_len = prolog['m_idx_len']
@@ -106,7 +107,7 @@ class GeoLocator:
         self._db_begin = self._fh.tell()
 
         if self._batch_mode:
-            self._b_idx_set = unpack('>%dL' % self._b_idx_len, self._b_idx_str)
+            self._b_idx_set = unpack(f'>{self._b_idx_len}L', self._b_idx_str)
             del self._b_idx_str
             self._m_idx_set = [self._m_idx_str[i:i + 4] for i in range(0, len(self._m_idx_str), 4)]
             del self._m_idx_str
@@ -231,7 +232,7 @@ class GeoLocator:
 
         else:
             start = (ip1oct - 1) * 4
-            blocks = dict(zip(('min', 'max'), unpack('>LL', self._b_idx_str[start:start + 8])))
+            blocks = dict(zip(('min', 'max'), unpack('>LL', self._b_idx_str[start:start + 8]), strict=False))
 
         range_ = self._range
 
@@ -239,8 +240,8 @@ class GeoLocator:
 
             part = self._search_idx(
                 ipn,
-                int(floor(blocks['min'] / range_)),
-                int(floor(blocks['max'] / range_) - 1)
+                floor(blocks['min'] / range_),
+                floor(blocks['max'] / range_) - 1
             )
 
             min_ = part * range_ if part > 0 else 0

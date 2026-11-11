@@ -1,77 +1,57 @@
-pysyge
-======
-http://github.com/idlesign/pysyge
+# pysyge
 
-|release| |lic| |coverage|
+<https://github.com/idlesign/pysyge>
 
-.. |release| image:: https://img.shields.io/pypi/v/pysyge.svg
-    :target: https://pypi.python.org/pypi/pysyge
+[![release](https://img.shields.io/pypi/v/pysyge.svg)](https://pypi.python.org/pypi/pysyge)
+[![lic](https://img.shields.io/pypi/l/pysyge.svg)](https://pypi.python.org/pypi/pysyge)
+[![coverage](https://img.shields.io/coveralls/idlesign/pysyge/master.svg)](https://coveralls.io/r/idlesign/pysyge)
 
-.. |lic| image:: https://img.shields.io/pypi/l/pysyge.svg
-    :target: https://pypi.python.org/pypi/pysyge
-
-.. |coverage| image:: https://img.shields.io/coveralls/idlesign/pysyge/master.svg
-    :target: https://coveralls.io/r/idlesign/pysyge
-
-
-
-What's that
------------
+## What's that
 
 *pysyge is an API to access data from Sypex Geo IP database files from your Python code.*
 
-For more information about Sypex Geo databases and their features please visit http://sypexgeo.net.
+For more information about Sypex Geo databases and their features please visit <https://sypexgeo.net>.
 
 Direct DB link that might became broken over time:
 
-  * Sypex Geo City DB - http://sypexgeo.net/files/SxGeoCity_utf8.zip
+* Sypex Geo City DB — <https://sypexgeo.net/files/SxGeoCity_utf8.zip>
 
+## Requirements
 
+* Python 3.10+
 
-Requirements
-------------
-
-* Python 3.6+
-
-
-
-Attention
----------
+## Attention
 
 1. This version of pysyge works with **Sypex Geo DB version 2.2 or above**.
 
-  The structure of a dictionary returned by GeoLocator.get_location() was preserved in a backward compatible manner
-  as much as possible, yet it's advised to update your code to use data from `info` sub dictionary.
+    The structure of a dictionary returned by `GeoLocator.get_location()` was preserved in a backward compatible manner
+    as much as possible, yet it's advised to update your code to use data from `info` sub dictionary.
 
 2. This version of pysyge works with **UTF-8** Sypex Geo Databases. Texts returned by pysyge are **UTF-8**.
 
+## Quickstart
 
+Download Geo IP database file from <https://sypexgeo.net/> (example below uses `SxGeoCityMax.dat` file).
 
-Quickstart
-----------
+Application sample:
 
-Download Geo IP database file from http://sypexgeo.net/ (example below uses ``SxGeoCityMax.dat`` file).
+```python
+# Import all we need from pysyge module.
+from pysyge import GeoLocator, MODE_BATCH, MODE_MEMORY
 
-Application sample
+# Create GeoLocator object to access API
+# from 'SxGeoCityMax.dat' using fast memory mode.
+geodata = GeoLocator('SxGeoCityMax.dat', MODE_BATCH | MODE_MEMORY)
 
-.. code-block:: python
+# Let's get some meta information.
+print('DB version %s (%s)' % (geodata.get_db_version(), geodata.get_db_date()))
 
-    # Import all we need from pysyge module.
-    from pysyge import GeoLocator, MODE_BATCH, MODE_MEMORY
+# Request geo information for 77.88.21.3 IP address.
+# Getting detailed information, including region info.
+location = geodata.get_location('77.88.21.3', detailed=True)
 
-    # Create GeoLocator object to access API
-    # from 'SxGeoCityMax.dat' using fast memory mode.
-    geodata = GeoLocator('SxGeoCityMax.dat', MODE_BATCH | MODE_MEMORY)
-
-    # Let's get some meta information.
-    print('DB version %s (%s)' % (geodata.get_db_version(), geodata.get_db_date()))
-
-    # Request geo information for 77.88.21.3 IP address.
-    # Getting detailed information, including region info.
-    location = geodata.get_location('77.88.21.3', detailed=True)
-
-    # Print out some lyrics.
-    # Most interesting data is under `info` in `city`, `country` and `region` dictionaries
-    print('%s (%s) calling. All the circuits are busy.' % (
-        location['info']['city']['name_en'], location['info']['country']['iso']))
-
+# Print out some lyrics.
+# Most interesting data is under `info` in `city`, `country` and `region` dictionaries
+print('%s (%s) calling. All the circuits are busy.' % (
+    location['info']['city']['name_en'], location['info']['country']['iso']))
+```
